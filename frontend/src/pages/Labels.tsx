@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Product, ProductVariant } from '../types';
+import type { Product, ProductVariant } from '../types';
 import { Plus, Trash2, Printer, LayoutGrid, CheckCircle, HelpCircle, X, Search } from 'lucide-react';
 
 interface BatchLabelItem {
@@ -272,7 +272,7 @@ export const Labels: React.FC = () => {
                 style={{ flex: 1, padding: '0.5rem' }}
                 onClick={() => setLabelSize('thermal')}
               >
-                Impresora Térmica (50mm x 30mm)
+                Impresora Térmica (40mm x 30mm)
               </button>
               <button
                 type="button"
@@ -280,7 +280,7 @@ export const Labels: React.FC = () => {
                 style={{ flex: 1, padding: '0.5rem' }}
                 onClick={() => setLabelSize('sheet')}
               >
-                Hoja Adhesiva Carta (3x10)
+                Hoja Adhesiva Carta (4x9)
               </button>
             </div>
           </div>
@@ -296,9 +296,9 @@ export const Labels: React.FC = () => {
               <span>{flatLabels.length}</span>
             </div>
             {labelSize === 'sheet' && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: flatLabels.length > 30 ? 'var(--warning)' : 'inherit' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: flatLabels.length > 36 ? 'var(--warning)' : 'inherit' }}>
                 <span>Hojas de papel estimadas:</span>
-                <span>{Math.ceil(flatLabels.length / 30)}</span>
+                <span>{Math.ceil(flatLabels.length / 36)}</span>
               </div>
             )}
           </div>
@@ -437,10 +437,10 @@ export const Labels: React.FC = () => {
       <div style={{ display: 'none' }}>
         <div className="print-area">
           {labelSize === 'sheet' ? (
-            // Sheet Grid Avery 3x10
-            Array.from({ length: Math.ceil(flatLabels.length / 30) }).map((_, sheetIdx) => (
+            // Sheet Grid Avery 4x9 (36 labels per sheet)
+            Array.from({ length: Math.ceil(flatLabels.length / 36) }).map((_, sheetIdx) => (
               <div key={sheetIdx} className="print-sheet">
-                {flatLabels.slice(sheetIdx * 30, (sheetIdx + 1) * 30).map((lbl, idx) => (
+                {flatLabels.slice(sheetIdx * 36, (sheetIdx + 1) * 36).map((lbl, idx) => (
                   <div key={idx} className="antara-label sheet">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', borderBottom: '1px solid #000', paddingBottom: '2px', marginBottom: '2px' }}>
                       <span className="label-title">ANTARA</span>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import { useApp } from '../context/AppContext';
-import { Product, Customer } from '../types';
+import type { Product, Customer } from '../types';
 import { Search, Plus, Minus, Trash2, UserPlus, ShoppingCart, Percent, User, Receipt, AlertCircle, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 

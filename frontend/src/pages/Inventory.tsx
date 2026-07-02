@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { InventoryMovement, Product } from '../types';
+import type { InventoryMovement, Product } from '../types';
 import { Plus, Search, Filter, ArrowUpRight, ArrowDownRight, RefreshCw, X, Calendar } from 'lucide-react';
 
 export const Inventory: React.FC = () => {

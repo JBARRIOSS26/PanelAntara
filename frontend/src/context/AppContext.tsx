@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
-import { User } from '../types';
+import type { User } from '../types';
 
 interface CartItem {
   variant_id: number;

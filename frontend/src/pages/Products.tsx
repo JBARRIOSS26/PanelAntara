@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Product, Category, Brand, Propietaria } from '../types';
+import type { Product, Category, Brand, Propietaria } from '../types';
 import { Plus, Edit2, Trash2, Search, X, PlusCircle, MinusCircle, AlertTriangle } from 'lucide-react';
 
 interface VariantFormInput {

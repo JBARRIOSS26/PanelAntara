@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Propietaria } from '../types';
+import type { Propietaria } from '../types';
 import { Save, Plus, Edit2, Trash2, Settings, Store, Users, Percent } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {

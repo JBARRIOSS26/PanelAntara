@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Sale, Customer, User } from '../types';
+import type { Sale, Customer, User } from '../types';
 import { Search, Calendar, Filter, Eye, RefreshCw, X, Receipt, Trash2 } from 'lucide-react';
 
 export const Sales: React.FC = () => {

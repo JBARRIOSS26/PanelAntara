@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { User } from '../types';
+import type { User } from '../types';
 import { Plus, Edit2, Trash2, Shield, X, Key, UserPlus } from 'lucide-react';
 
 export const Users: React.FC = () => {
