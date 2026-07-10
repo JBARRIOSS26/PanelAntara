@@ -228,21 +228,28 @@ export const POS: React.FC = () => {
 
   return (
     <div className="pos-layout">
-      <div className="screen-only" style={{ display: 'flex', width: '100%', height: '100%', gap: '1rem' }}>
+      <div className="screen-only" style={{ display: 'grid', gridTemplateColumns: '1fr 420px', width: '100%', height: '100%', gap: '1rem' }}>
       
       {/* Catalog / Left Panel */}
       <div className="pos-catalog">
         
         {/* Search bar & Category quick filters */}
-        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
           <form onSubmit={handleSearchSubmit} style={{ flex: 1, position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input
               ref={searchInputRef}
               type="text"
               className="form-control"
-              style={{ paddingLeft: '38px' }}
-              placeholder="Escriba producto, SKU o escanee código de barras..."
+              style={{ 
+                paddingLeft: '40px', 
+                height: '42px', 
+                fontSize: '0.9rem', 
+                borderRadius: 'var(--radius-sm)', 
+                borderColor: 'var(--border-color)', 
+                backgroundColor: 'var(--bg-card)' 
+              }}
+              placeholder="Buscar producto, SKU o escanear código de barras..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -250,17 +257,32 @@ export const POS: React.FC = () => {
           
           <select 
             className="form-control"
-            style={{ width: '180px' }}
+            style={{ 
+              width: '190px', 
+              height: '42px', 
+              fontSize: '0.85rem', 
+              borderRadius: 'var(--radius-sm)', 
+              borderColor: 'var(--border-color)', 
+              backgroundColor: 'var(--bg-card)',
+              cursor: 'pointer',
+              fontWeight: 500
+            }}
             value={selectedCatId}
             onChange={(e) => setSelectedCatId(e.target.value)}
           >
-            <option value="">Todas Categorías</option>
+            <option value="">Todas las Categorías</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
 
         {/* Variants List grid */}
-        <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Variantes del Catálogo</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+          <h3 style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 600 }}>Variantes del Catálogo</h3>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+            {getFilteredVariants().length} ítems encontrados
+          </span>
+        </div>
+
         <div className="pos-grid-products">
           {getFilteredVariants().map((variant) => {
             const isOutOfStock = variant.stock <= 0 && settings.allow_negative_stock !== 'true';
@@ -270,30 +292,50 @@ export const POS: React.FC = () => {
                 className="pos-product-card"
                 onClick={() => !isOutOfStock && addToCart(variant)}
                 style={{ 
-                  opacity: isOutOfStock ? 0.5 : 1, 
+                  opacity: isOutOfStock ? 0.6 : 1, 
                   cursor: isOutOfStock ? 'not-allowed' : 'pointer',
-                  border: isOutOfStock ? '1px dashed var(--danger)' : '1px solid var(--border-color)'
+                  borderColor: isOutOfStock ? 'var(--danger)' : 'var(--border-color)',
+                  borderStyle: isOutOfStock ? 'dashed' : 'solid',
+                  backgroundColor: 'var(--bg-card)',
+                  padding: '1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
                 }}
               >
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '0.25rem' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 700, lineHeight: 1.2 }}>{variant.product_name}</span>
-                    <span className="badge badge-primary" style={{ fontSize: '0.65rem' }}>{variant.owner_name}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '0.25rem', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, lineHeight: 1.25, color: 'var(--text-main)' }}>{variant.product_name}</span>
+                    <span style={{ 
+                      fontSize: '0.6rem', 
+                      padding: '0.1rem 0.4rem', 
+                      backgroundColor: 'rgba(181, 122, 103, 0.15)', 
+                      color: 'var(--primary)', 
+                      fontWeight: 700, 
+                      borderRadius: '4px',
+                      textTransform: 'uppercase',
+                      flexShrink: 0
+                    }}>
+                      {variant.owner_name}
+                    </span>
                   </div>
-                  <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem' }}>
-                    {variant.size && <span className="badge" style={{ backgroundColor: 'var(--bg-app)', fontSize: '0.65rem' }}>T: {variant.size}</span>}
-                    {variant.color && <span className="badge" style={{ backgroundColor: 'var(--bg-app)', fontSize: '0.65rem' }}>C: {variant.color}</span>}
+                  
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginBottom: '0.5rem' }}>
+                    {variant.size && <span style={{ backgroundColor: 'var(--bg-app)', color: 'var(--text-muted)', fontSize: '0.65rem', padding: '0.1rem 0.45rem', borderRadius: '4px', fontWeight: 500 }}>T: {variant.size}</span>}
+                    {variant.color && <span style={{ backgroundColor: 'var(--bg-app)', color: 'var(--text-muted)', fontSize: '0.65rem', padding: '0.1rem 0.45rem', borderRadius: '4px', fontWeight: 500 }}>C: {variant.color}</span>}
+                    {isOutOfStock && <span style={{ backgroundColor: 'var(--danger-light)', color: 'var(--danger)', fontSize: '0.65rem', padding: '0.1rem 0.45rem', borderRadius: '4px', fontWeight: 700 }}>Agotado</span>}
                   </div>
-                  <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '0.25rem' }}>
+                  
+                  <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
                     SKU: {variant.sku || 'N/A'}
                   </span>
                 </div>
                 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.5rem' }}>
-                  <span style={{ fontSize: '0.8rem', color: variant.stock <= 0 ? 'var(--danger)' : 'var(--text-muted)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.5rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: variant.stock <= 0 ? 'var(--danger)' : 'var(--text-muted)', fontWeight: 500 }}>
                     Stock: {variant.stock} u.
                   </span>
-                  <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--primary)' }}>
+                  <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--primary)' }}>
                     {formatCurrency(variant.sell_price)}
                   </span>
                 </div>
@@ -307,11 +349,28 @@ export const POS: React.FC = () => {
       <div className="pos-sidebar">
         
         {/* Customer Select */}
-        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '0.5rem', alignItems: 'center', backgroundColor: 'var(--bg-hover)' }}>
-          <User size={18} style={{ color: 'var(--text-muted)' }} />
+        <div style={{ 
+          padding: '1.25rem 1rem', 
+          borderBottom: '1px solid var(--border-color)', 
+          display: 'flex', 
+          gap: '0.75rem', 
+          alignItems: 'center', 
+          backgroundColor: 'rgba(247, 245, 240, 0.6)' 
+        }}>
+          <User size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
           <select 
             className="form-control"
-            style={{ flex: 1, height: '36px', padding: '0.25rem 0.5rem', fontSize: '0.85rem' }}
+            style={{ 
+              flex: 1, 
+              height: '38px', 
+              padding: '0.25rem 1rem', 
+              fontSize: '0.85rem', 
+              borderRadius: '9999px', 
+              borderColor: 'var(--border-color)',
+              backgroundColor: 'var(--bg-card)',
+              cursor: 'pointer',
+              fontWeight: 500
+            }}
             value={selectedCustomerId}
             onChange={(e) => setSelectedCustomerId(e.target.value)}
           >
@@ -321,7 +380,17 @@ export const POS: React.FC = () => {
           <button 
             type="button" 
             className="btn btn-secondary" 
-            style={{ padding: '0.5rem', minWidth: 'unset' }}
+            style={{ 
+              padding: 0,
+              width: '38px',
+              height: '38px',
+              minWidth: 'unset',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}
             onClick={() => setIsCustomerModalOpen(true)}
             title="Registrar nuevo cliente"
           >
@@ -329,7 +398,6 @@ export const POS: React.FC = () => {
           </button>
         </div>
 
-        {/* Cart Item list */}
         <div className="pos-cart-list">
           {cart.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)' }}>
@@ -339,66 +407,68 @@ export const POS: React.FC = () => {
           ) : (
             cart.map((item) => (
               <div key={item.variant_id} className="pos-cart-item">
-                <div style={{ flex: 1, minWidth: 0, paddingRight: '0.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                    <span style={{ fontWeight: 600, fontSize: '0.85rem', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {item.product_name}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', width: '100%' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.85rem', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '85%' }}>
+                    {item.product_name}
+                  </span>
+                  <button 
+                    className="btn" 
+                    style={{ padding: '0.25rem', border: 'none', background: 'none', color: 'var(--danger)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                    onClick={() => removeFromCart(item.variant_id)}
+                  >
+                    <Trash2 size={13} style={{ flexShrink: 0 }} />
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.15rem', marginBottom: '0.75rem' }}>
+                  <span className="badge" style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-muted)', fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                    Talla: {item.size || 'Única'}
+                  </span>
+                  <span className="badge" style={{ backgroundColor: 'var(--bg-hover)', color: 'var(--text-muted)', fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                    Color: {item.color || 'N/A'}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                  {/* Quantity selector */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <button 
+                      className="pos-quantity-btn" 
+                      onClick={() => updateCartQuantity(item.variant_id, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                    >
+                      <Minus size={10} />
+                    </button>
+                    <span style={{ fontWeight: 700, fontSize: '0.85rem', width: '24px', textAlign: 'center' }}>
+                      {item.quantity}
                     </span>
                     <button 
-                      className="btn" 
-                      style={{ padding: '0.25rem', border: 'none', background: 'none', color: 'var(--danger)' }}
-                      onClick={() => removeFromCart(item.variant_id)}
+                      className="pos-quantity-btn" 
+                      onClick={() => updateCartQuantity(item.variant_id, item.quantity + 1)}
                     >
-                      <Trash2 size={12} />
+                      <Plus size={10} />
                     </button>
                   </div>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>
-                    Size: {item.size || 'Única'} | Color: {item.color || 'N/A'}
-                  </span>
-                  
-                  {/* Prices & item discounts */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-                    
-                    {/* Quantity Selector */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <button 
-                        className="btn btn-secondary" 
-                        style={{ padding: '0.15rem 0.35rem', minWidth: 'unset', height: '24px' }}
-                        onClick={() => updateCartQuantity(item.variant_id, item.quantity - 1)}
-                      >
-                        <Minus size={10} />
-                      </button>
-                      <span style={{ fontWeight: 700, fontSize: '0.85rem', width: '24px', textAlign: 'center' }}>
-                        {item.quantity}
-                      </span>
-                      <button 
-                        className="btn btn-secondary" 
-                        style={{ padding: '0.15rem 0.35rem', minWidth: 'unset', height: '24px' }}
-                        onClick={() => updateCartQuantity(item.variant_id, item.quantity + 1)}
-                      >
-                        <Plus size={10} />
-                      </button>
-                    </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      {/* Item discount input */}
-                      <Percent size={10} style={{ color: 'var(--text-muted)' }} />
-                      <input 
-                        type="number" 
-                        className="form-control"
-                        style={{ width: '45px', padding: '0.1rem 0.25rem', fontSize: '0.75rem', height: '22px', textAlign: 'center' }}
-                        min="0"
-                        max="100"
-                        value={item.discount || ''}
-                        placeholder="%"
-                        onChange={(e) => updateCartDiscount(item.variant_id, parseInt(e.target.value, 10) || 0)}
-                      />
-                    </div>
-
-                    <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                      {formatCurrency(item.total)}
-                    </span>
+                  {/* Discount input */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <Percent size={11} style={{ color: 'var(--text-muted)' }} />
+                    <input 
+                      type="number" 
+                      className="pos-input-compact"
+                      min="0"
+                      max="100"
+                      value={item.discount || ''}
+                      placeholder="0"
+                      onChange={(e) => updateCartDiscount(item.variant_id, parseInt(e.target.value, 10) || 0)}
+                    />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>%</span>
                   </div>
+
+                  {/* Total price */}
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--primary)' }}>
+                    {formatCurrency(item.total)}
+                  </span>
                 </div>
               </div>
             ))
@@ -426,54 +496,53 @@ export const POS: React.FC = () => {
           )}
 
           {/* Subtotals & tax desglose */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.85rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: 'var(--text-muted)' }}>Subtotal:</span>
-              <span>{formatCurrency(cartTotals.subtotal)}</span>
+              <span style={{ fontWeight: 500 }}>{formatCurrency(cartTotals.subtotal)}</span>
             </div>
             
             {/* General Discount */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <span style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 Descuento General:
                 <input 
                   type="number"
-                  className="form-control"
-                  style={{ width: '45px', height: '20px', padding: '0 0.25rem', fontSize: '0.75rem', display: 'inline-block' }}
+                  className="pos-input-compact"
                   min="0"
                   max="100"
                   value={cartDiscount || ''}
                   onChange={(e) => setCartDiscount(parseInt(e.target.value, 10) || 0)}
                 />
-                %
+                <span>%</span>
               </span>
-              <span style={{ color: 'var(--danger)' }}>-{formatCurrency(cartTotals.discountAmount)}</span>
+              <span style={{ color: 'var(--danger)', fontWeight: 600 }}>-{formatCurrency(cartTotals.discountAmount)}</span>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
               <span style={{ color: 'var(--text-muted)' }}>
                 IVA ({parseFloat(settings.store_tax_rate || '0.16') * 100}%):
-                <small style={{ fontSize: '0.7rem', display: 'block', color: 'var(--text-muted)' }}>
-                  {settings.store_tax_included !== 'false' ? '(incluido)' : '(por cobrar)'}
+                <small style={{ fontSize: '0.7rem', display: 'block', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '1px' }}>
+                  {settings.store_tax_included !== 'false' ? '(incluido en el precio)' : '(por cobrar)'}
                 </small>
               </span>
-              <span>{formatCurrency(cartTotals.taxAmount)}</span>
+              <span style={{ fontWeight: 500 }}>{formatCurrency(cartTotals.taxAmount)}</span>
             </div>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', fontWeight: 800, marginTop: '0.5rem', color: 'var(--primary)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.3rem', fontWeight: 800, marginTop: '0.5rem', color: 'var(--primary)' }}>
               <span>Total:</span>
               <span>{formatCurrency(cartTotals.total)}</span>
             </div>
           </div>
 
           {/* Payment selector */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
-            <label className="form-label" style={{ marginBottom: '0.25rem' }}>Método de Pago</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+            <label className="form-label" style={{ marginBottom: '0.25rem', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Método de Pago</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
               <button 
                 type="button" 
                 className={`btn ${paymentMethod === 'cash' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ padding: '0.4rem', fontSize: '0.8rem' }}
+                style={{ padding: '0.5rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
                 onClick={() => setPaymentMethod('cash')}
               >
                 Efectivo
@@ -481,7 +550,7 @@ export const POS: React.FC = () => {
               <button 
                 type="button" 
                 className={`btn ${paymentMethod === 'card' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ padding: '0.4rem', fontSize: '0.8rem' }}
+                style={{ padding: '0.5rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
                 onClick={() => setPaymentMethod('card')}
               >
                 Tarjeta
@@ -489,7 +558,7 @@ export const POS: React.FC = () => {
               <button 
                 type="button" 
                 className={`btn ${paymentMethod === 'transfer' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ padding: '0.4rem', fontSize: '0.8rem' }}
+                style={{ padding: '0.5rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
                 onClick={() => setPaymentMethod('transfer')}
               >
                 Transferencia
@@ -497,7 +566,7 @@ export const POS: React.FC = () => {
               <button 
                 type="button" 
                 className={`btn ${paymentMethod === 'mixed' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ padding: '0.4rem', fontSize: '0.8rem' }}
+                style={{ padding: '0.5rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
                 onClick={() => setPaymentMethod('mixed')}
               >
                 Mixto
@@ -507,22 +576,34 @@ export const POS: React.FC = () => {
 
           {/* Cash Received Input */}
           {(paymentMethod === 'cash' || paymentMethod === 'mixed') && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem', backgroundColor: 'var(--bg-hover)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '0.5rem', 
+              marginBottom: '1.25rem', 
+              backgroundColor: 'rgba(247, 245, 240, 0.9)', 
+              padding: '0.85rem', 
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-color)'
+            }}>
               {paymentMethod === 'cash' ? (
                 <>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Efectivo Recibido:</span>
-                    <input 
-                      type="number" 
-                      className="form-control"
-                      style={{ width: '120px', height: '30px' }}
-                      value={cashReceived || ''}
-                      onChange={(e) => setCashReceived(parseFloat(e.target.value) || 0)}
-                      required
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>$</span>
+                      <input 
+                        type="number" 
+                        className="form-control"
+                        style={{ width: '100px', height: '32px', padding: '0.25rem 0.5rem', textAlign: 'right', fontWeight: 600, borderRadius: '6px' }}
+                        value={cashReceived || ''}
+                        onChange={(e) => setCashReceived(parseFloat(e.target.value) || 0)}
+                        required
+                      />
+                    </div>
                   </div>
                   {cashReceived > cartTotals.total && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.25rem', fontSize: '0.85rem', color: 'var(--success)', fontWeight: 700 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed var(--border-color)', fontSize: '0.85rem', color: 'var(--success)', fontWeight: 700 }}>
                       <span>Cambio a devolver:</span>
                       <span>{formatCurrency(cashReceived - cartTotals.total)}</span>
                     </div>
@@ -531,14 +612,13 @@ export const POS: React.FC = () => {
               ) : (
                 // Mixed payments
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, borderBottom: '1px solid var(--border-color)', paddingBottom: '0.25rem' }}>Desglose de Pago Mixto</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, borderBottom: '1px solid var(--border-color)', paddingBottom: '0.35rem', color: 'var(--text-main)' }}>Desglose de Pago Mixto</span>
                   
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.75rem' }}>Efectivo:</span>
                     <input 
                       type="number" 
-                      className="form-control"
-                      style={{ width: '100px', height: '26px', fontSize: '0.8rem' }}
+                      style={{ width: '80px', height: '28px', fontSize: '0.8rem', textAlign: 'right', padding: '0 0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}
                       value={cashReceived || ''}
                       onChange={(e) => setCashReceived(parseFloat(e.target.value) || 0)}
                     />
@@ -547,8 +627,7 @@ export const POS: React.FC = () => {
                     <span style={{ fontSize: '0.75rem' }}>Tarjeta:</span>
                     <input 
                       type="number" 
-                      className="form-control"
-                      style={{ width: '100px', height: '26px', fontSize: '0.8rem' }}
+                      style={{ width: '80px', height: '28px', fontSize: '0.8rem', textAlign: 'right', padding: '0 0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}
                       value={cardReceived || ''}
                       onChange={(e) => setCardReceived(parseFloat(e.target.value) || 0)}
                     />
@@ -557,17 +636,19 @@ export const POS: React.FC = () => {
                     <span style={{ fontSize: '0.75rem' }}>Transferencia:</span>
                     <input 
                       type="number" 
-                      className="form-control"
-                      style={{ width: '100px', height: '26px', fontSize: '0.8rem' }}
+                      style={{ width: '80px', height: '28px', fontSize: '0.8rem', textAlign: 'right', padding: '0 0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}
                       value={transferReceived || ''}
                       onChange={(e) => setTransferReceived(parseFloat(e.target.value) || 0)}
                     />
                   </div>
                   
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', borderTop: '1px dashed var(--border-color)', paddingTop: '0.25rem', fontWeight: 600 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', borderTop: '1px dashed var(--border-color)', paddingTop: '0.5rem', fontWeight: 600, marginTop: '0.25rem' }}>
                     <span>Registrado: {formatCurrency(cashReceived + cardReceived + transferReceived)}</span>
                     <span style={{ color: Math.abs((cashReceived + cardReceived + transferReceived) - cartTotals.total) > 0.01 ? 'var(--danger)' : 'var(--success)' }}>
-                      Faltan: {formatCurrency(Math.max(0, cartTotals.total - (cashReceived + cardReceived + transferReceived)))}
+                      {Math.abs((cashReceived + cardReceived + transferReceived) - cartTotals.total) > 0.01 
+                        ? `Diferencia: ${formatCurrency(cartTotals.total - (cashReceived + cardReceived + transferReceived))}`
+                        : 'Monto Completo'
+                      }
                     </span>
                   </div>
                 </div>
