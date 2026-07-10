@@ -97,7 +97,7 @@ export const Sidebar: React.FC = () => {
     <aside className="sidebar">
       <div className="sidebar-header" style={{ padding: '1.5rem 1rem' }}>
         <ShoppingCart size={22} style={{ color: 'var(--primary)' }} />
-        <span className="sidebar-logo" style={{ color: 'var(--primary)', background: 'none', webkitTextFillColor: 'unset' }}>ANTARA</span>
+        <span className="sidebar-logo" style={{ color: 'var(--primary)', background: 'none', WebkitTextFillColor: 'unset' }}>ANTARA</span>
       </div>
 
       <nav className="sidebar-menu" style={{ padding: '1rem 0.5rem' }}>

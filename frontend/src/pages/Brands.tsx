@@ -21,7 +21,7 @@ export const Brands: React.FC = () => {
     try {
       const data = await api.catalogs.listBrands();
       setBrands(data);
-    } catch (err) {
+    } catch {
       setError('Error al cargar marcas.');
     } finally {
       setLoading(false);

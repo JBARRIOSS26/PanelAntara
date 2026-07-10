@@ -21,7 +21,7 @@ export const Categories: React.FC = () => {
     try {
       const data = await api.catalogs.listCategories();
       setCategories(data);
-    } catch (err) {
+    } catch {
       setError('Error al cargar categorías.');
     } finally {
       setLoading(false);

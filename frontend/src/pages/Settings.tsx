@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import type { Propietaria } from '../types';
-import { Save, Plus, Edit2, Trash2, Settings, Store, Users, Percent } from 'lucide-react';
+import { Save, Edit2, Trash2, Store, Users } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'store' | 'owners'>('store');
@@ -74,7 +74,7 @@ export const SettingsPage: React.FC = () => {
       setSuccessMsg('Configuración guardada exitosamente.');
       // Triggers loadSettings in global AppContext (we'll make sure it's updated)
       window.location.reload(); // Simple reload ensures all states get refreshed context-wise
-    } catch (err) {
+    } catch {
       setError('Error al guardar configuraciones.');
     }
   };

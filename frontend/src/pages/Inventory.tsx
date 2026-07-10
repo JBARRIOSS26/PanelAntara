@@ -35,7 +35,7 @@ export const Inventory: React.FC = () => {
         search: search || undefined
       });
       setMovements(data);
-    } catch (err) {
+    } catch {
       setError('Error al cargar historial de movimientos.');
     } finally {
       setLoading(false);
@@ -54,6 +54,7 @@ export const Inventory: React.FC = () => {
   useEffect(() => {
     loadMovements();
     loadProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typeFilter, startDate, endDate]);
 
   const handleOpenModal = () => {

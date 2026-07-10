@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import type { Product, ProductVariant } from '../types';
-import { Plus, Trash2, Printer, LayoutGrid, CheckCircle, HelpCircle, X, Search } from 'lucide-react';
+import type { Product } from '../types';
+import { Trash2, Printer } from 'lucide-react';
 
 interface BatchLabelItem {
   id: number;
@@ -85,17 +85,12 @@ export const Labels: React.FC = () => {
   // Printing Configuration
   const [labelSize, setLabelSize] = useState<'thermal' | 'sheet'>('thermal');
   const [batch, setBatch] = useState<BatchLabelItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const loadData = async () => {
-    setLoading(true);
     try {
       const data = await api.products.list();
       setProducts(data.filter(p => p.status === 1));
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -182,15 +177,20 @@ export const Labels: React.FC = () => {
   };
 
   const triggerPrint = () => {
+    // Set the correct @page rule based on selected label format
+    const printClass = labelSize === 'thermal' ? 'print-label-thermal' : 'print-label-sheet';
+    document.documentElement.classList.add(printClass);
     window.print();
+    // Clean up after print dialog closes
+    document.documentElement.classList.remove(printClass);
   };
 
   const flatLabels = getFlatLabelsList();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem', alignItems: 'start' }}>
+      <div className="screen-only" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem', alignItems: 'start' }}>
         
         {/* Left Side: Label Builder form */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -432,9 +432,10 @@ export const Labels: React.FC = () => {
           </div>
         )}
       </div>
+      </div> {/* Close screen-only */}
 
-      {/* HIDDEN PRINT CONTAINER (Targeted by media queries in @media print inside index.css) */}
-      <div style={{ display: 'none' }}>
+      {/* HIDDEN PRINT CONTAINER */}
+      <div className="print-only">
         <div className="print-area">
           {labelSize === 'sheet' ? (
             // Sheet Grid Avery 4x9 (36 labels per sheet)

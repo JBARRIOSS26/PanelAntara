@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import type { Sale, Customer, User } from '../types';
-import { Search, Calendar, Filter, Eye, RefreshCw, X, Receipt, Trash2 } from 'lucide-react';
+import { Search, Calendar, Filter, Eye, X, Receipt, Trash2 } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
 export const Sales: React.FC = () => {
+  const { settings } = useApp();
   const [sales, setSales] = useState<Sale[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [employees, setEmployees] = useState<User[]>([]);
@@ -21,7 +23,6 @@ export const Sales: React.FC = () => {
 
   // Selected Sale details modal
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
-  const [loadingDetails, setLoadingDetails] = useState(false);
   const [cancellingSale, setCancellingSale] = useState(false);
 
   const loadFilterData = async () => {
@@ -50,7 +51,7 @@ export const Sales: React.FC = () => {
         search: search || undefined
       });
       setSales(data);
-    } catch (err) {
+    } catch {
       setError('Error al cargar historial de ventas.');
     } finally {
       setLoading(false);
@@ -59,6 +60,7 @@ export const Sales: React.FC = () => {
 
   useEffect(() => {
     loadSales();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId, userId, paymentMethod, status, startDate, endDate]);
 
   useEffect(() => {
@@ -66,14 +68,11 @@ export const Sales: React.FC = () => {
   }, []);
 
   const handleViewDetails = async (id: number) => {
-    setLoadingDetails(true);
     try {
       const sale = await api.sales.get(id);
       setSelectedSale(sale);
-    } catch (err) {
+    } catch {
       alert('Error al cargar los detalles de la venta.');
-    } finally {
-      setLoadingDetails(false);
     }
   };
 
@@ -96,7 +95,9 @@ export const Sales: React.FC = () => {
   };
 
   const handlePrint = () => {
+    document.documentElement.classList.add('print-ticket');
     window.print();
+    document.documentElement.classList.remove('print-ticket');
   };
 
   const formatCurrency = (val: number) => {
@@ -105,8 +106,8 @@ export const Sales: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      
-      {/* Filters Card */}
+      <div className="screen-only" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%' }}>
+        {/* Filters Card */}
       <div className="card" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
         
         {/* Search */}
@@ -383,13 +384,16 @@ export const Sales: React.FC = () => {
           </div>
         </div>
       )}
+      </div> {/* Close screen-only */}
 
       {/* HIDDEN PRINT COMPONENT FOR RE-PRINTING TICKETS */}
       {selectedSale && (
-        <div style={{ display: 'none' }}>
+        <div className="print-only">
           <div className="print-area ticket-print" style={{ fontFamily: 'monospace', fontSize: '12px' }}>
             <div style={{ textAlign: 'center' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{api.settings.get ? 'ANTARA' : 'ANTARA'}</h3>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{settings.store_name || 'ANTARA'}</h3>
+              {settings.store_address && <p style={{ margin: 0 }}>{settings.store_address}</p>}
+              {settings.store_phone && <p style={{ margin: 0 }}>Tel: {settings.store_phone}</p>}
               <p style={{ margin: 0 }}>Venta #{selectedSale.id} (REIMPRESIÓN)</p>
               <p style={{ margin: 0 }}>
                 Fecha: {new Date(selectedSale.created_at).toLocaleString('es-MX')}
@@ -453,7 +457,7 @@ export const Sales: React.FC = () => {
               <p style={{ margin: 0 }}>Método de Pago: {selectedSale.payment_method.toUpperCase()}</p>
               <p style={{ margin: 0 }}>Estado: {selectedSale.status.toUpperCase()}</p>
               <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
-              <p style={{ fontStyle: 'italic', fontWeight: 600 }}>¡Gracias por su compra en ANTARA!</p>
+              <p style={{ fontStyle: 'italic', fontWeight: 600 }}>{settings.ticket_footer || '¡Gracias por su compra en ANTARA!'}</p>
             </div>
           </div>
         </div>

@@ -19,7 +19,7 @@ export const Reports: React.FC = () => {
         endDate || undefined
       );
       setAnalytics(data);
-    } catch (err) {
+    } catch {
       setError('Error al generar reportes financieros.');
     } finally {
       setLoading(false);
@@ -41,6 +41,7 @@ export const Reports: React.FC = () => {
     if (startDate && endDate) {
       loadAnalytics();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate]);
 
   const formatCurrency = (val: number) => {

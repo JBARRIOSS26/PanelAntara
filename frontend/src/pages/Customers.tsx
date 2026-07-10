@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import type { Customer, Sale } from '../types';
-import { Plus, Edit2, Trash2, Search, X, Calendar, DollarSign, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, Calendar, Eye } from 'lucide-react';
 
 export const Customers: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -28,7 +28,7 @@ export const Customers: React.FC = () => {
     try {
       const data = await api.customers.list(search || undefined);
       setCustomers(data);
-    } catch (err) {
+    } catch {
       setError('Error al cargar clientes.');
     } finally {
       setLoading(false);
@@ -37,6 +37,7 @@ export const Customers: React.FC = () => {
 
   useEffect(() => {
     loadCustomers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   const handleOpenModal = (cust?: Customer) => {
@@ -230,7 +231,7 @@ export const Customers: React.FC = () => {
               Este cliente aún no ha realizado compras.
             </p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '500px', overflowy: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '500px', overflowY: 'auto' }}>
               {historySales.map((sale) => (
                 <div key={sale.id} style={{
                   border: '1px solid var(--border-color)',

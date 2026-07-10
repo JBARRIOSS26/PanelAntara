@@ -83,7 +83,7 @@ export const POS: React.FC = () => {
         // Trigger soft tone or animation feedback
         return;
       }
-    } catch (err) {
+    } catch {
       // Barcode lookup failed, fallback to local text search filter (already happening in UI list)
       console.log("Barcode not found, using search text.");
     }
@@ -183,13 +183,17 @@ export const POS: React.FC = () => {
       setNewCustEmail('');
       setNewCustNotes('');
       setIsCustomerModalOpen(false);
-    } catch (err) {
+    } catch {
       alert('Error al registrar el cliente.');
     }
   };
 
   const triggerPrintReceipt = () => {
+    // Add print-ticket class to <html> so the correct @page rule applies
+    document.documentElement.classList.add('print-ticket');
     window.print();
+    // Clean up after print dialog closes
+    document.documentElement.classList.remove('print-ticket');
   };
 
   // Filter product variants locally
@@ -220,10 +224,11 @@ export const POS: React.FC = () => {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(val);
   };
 
-  const selectedCustomerObj = customers.find(c => c.id === parseInt(selectedCustomerId, 10));
+
 
   return (
     <div className="pos-layout">
+      <div className="screen-only" style={{ display: 'flex', width: '100%', height: '100%', gap: '1rem' }}>
       
       {/* Catalog / Left Panel */}
       <div className="pos-catalog">
@@ -648,7 +653,7 @@ export const POS: React.FC = () => {
         </div>
       )}
 
-      {/* SIMULATED PRINT RECEIPT MODAL */}
+      {/* RECEIPT MODAL — Visual preview on screen */}
       {printedSale && (
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: '400px' }}>
@@ -660,8 +665,8 @@ export const POS: React.FC = () => {
             </div>
             
             <div className="modal-body" style={{ backgroundColor: '#fff', color: '#000', padding: '1rem', maxHeight: '60vh', overflowY: 'auto' }}>
-              {/* Receipt Area (for screen review and print capture) */}
-              <div className="print-area ticket-print" style={{ margin: '0 auto', fontFamily: 'monospace', fontSize: '12px' }}>
+              {/* On-screen preview (NOT printed — the hidden container below is) */}
+              <div style={{ margin: '0 auto', fontFamily: 'monospace', fontSize: '12px', maxWidth: '300px' }}>
                 <div style={{ textAlign: 'center' }}>
                   <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0.25rem 0' }}>{settings.store_name || 'ANTARA'}</h3>
                   <p style={{ margin: 0 }}>{settings.store_address || 'Av. Andrés Bello 12, CDMX'}</p>
@@ -678,7 +683,6 @@ export const POS: React.FC = () => {
                 
                 <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
                 
-                {/* Items */}
                 <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px dashed #000' }}>
@@ -705,7 +709,6 @@ export const POS: React.FC = () => {
                 
                 <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
                 
-                {/* Totals */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', paddingLeft: '40%' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Subtotal:</span>
@@ -751,6 +754,85 @@ export const POS: React.FC = () => {
                 <Receipt size={16} />
                 <span>Imprimir Ticket</span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      </div> {/* Close screen-only */}
+
+      {/* HIDDEN PRINT CONTAINER — This is what actually gets printed */}
+      {printedSale && (
+        <div className="print-only">
+          <div className="print-area ticket-print">
+            <div style={{ textAlign: 'center' }}>
+              <h3 style={{ fontSize: '14px', fontWeight: 800, margin: '2px 0' }}>{settings.store_name || 'ANTARA'}</h3>
+              <p style={{ margin: 0, fontSize: '9px' }}>{settings.store_address || 'Av. Andrés Bello 12, CDMX'}</p>
+              <p style={{ margin: 0, fontSize: '9px' }}>Tel: {settings.store_phone || '5512345678'}</p>
+            </div>
+            <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+            <div style={{ textAlign: 'center' }}>
+              <h4 style={{ margin: '2px 0', fontSize: '12px' }}>TICKET DE COMPRA</h4>
+              <p style={{ margin: 0 }}>Venta #{printedSale.id}</p>
+              <p style={{ margin: 0 }}>{new Date(printedSale.created_at).toLocaleString('es-MX')}</p>
+              <p style={{ margin: 0 }}>Atendido por: {printedSale.user_username}</p>
+              <p style={{ margin: 0 }}>Cliente: {printedSale.client_name || 'Público General'}</p>
+            </div>
+            <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px dashed #000' }}>
+                  <th style={{ textAlign: 'left', padding: '1px 0' }}>Desc</th>
+                  <th style={{ textAlign: 'center', padding: '1px 0' }}>Cant</th>
+                  <th style={{ textAlign: 'right', padding: '1px 0' }}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(printedSale.items || []).map((item: any, idx: number) => (
+                  <tr key={idx}>
+                    <td style={{ padding: '2px 0', verticalAlign: 'top' }}>
+                      {item.product_name}
+                      <div style={{ fontSize: '8px' }}>
+                        T: {item.size || 'Única'} | C: {item.color || 'N/A'}
+                      </div>
+                    </td>
+                    <td style={{ textAlign: 'center', padding: '2px 0', verticalAlign: 'top' }}>{item.quantity}</td>
+                    <td style={{ textAlign: 'right', padding: '2px 0', verticalAlign: 'top' }}>{formatCurrency(item.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', paddingLeft: '35%' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Subtotal:</span>
+                <span>{formatCurrency(printedSale.subtotal)}</span>
+              </div>
+              {printedSale.discount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Desc:</span>
+                  <span>-{formatCurrency(printedSale.discount)}</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>IVA:</span>
+                <span>{formatCurrency(printedSale.tax)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '11px' }}>
+                <span>TOTAL:</span>
+                <span>{formatCurrency(printedSale.total)}</span>
+              </div>
+            </div>
+            <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ margin: '2px 0' }}>Pago: {printedSale.payment_method.toUpperCase()}</p>
+              {printedSale.payment_method === 'cash' && (
+                <>
+                  <p style={{ margin: 0 }}>Recibido: {formatCurrency(printedSale.cash_received)}</p>
+                  <p style={{ margin: 0 }}>Cambio: {formatCurrency(printedSale.cash_received - printedSale.total)}</p>
+                </>
+              )}
+              <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+              <p style={{ fontStyle: 'italic', fontWeight: 600, fontSize: '9px' }}>{settings.ticket_footer || '¡Gracias por su compra en ANTARA!'}</p>
             </div>
           </div>
         </div>

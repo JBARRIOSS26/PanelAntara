@@ -89,16 +89,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const login = async (username: string, password?: string) => {
-    try {
-      const res = await api.auth.login({ username, password });
-      localStorage.setItem('antara_token', res.token);
-      setToken(res.token);
-      setUser(res.user);
-      await loadSettings();
-      setActivePage('dashboard');
-    } catch (error) {
-      throw error;
-    }
+    const res = await api.auth.login({ username, password });
+    localStorage.setItem('antara_token', res.token);
+    setToken(res.token);
+    setUser(res.user);
+    await loadSettings();
+    setActivePage('dashboard');
   };
 
   const logout = () => {
@@ -247,6 +243,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components, react/only-export-components
 export const useApp = () => {
   const context = useContext(AppContext);
   if (!context) {

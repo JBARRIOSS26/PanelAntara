@@ -594,52 +594,128 @@ tr:hover td {
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+/* ============================================= */
+/* Print CSS                                     */
+/* ============================================= */
 
-/* Print CSS */
+/* On screen: hide print-only containers */
+.print-only {
+  display: none !important;
+}
+
+/* --- Named @page rules for each printer --- */
+@page ticket-page {
+  size: 58mm auto;   /* ZKTeco ZKP5803: 58mm width, continuous length */
+  margin: 0mm 1mm;
+}
+@page label-thermal-page {
+  size: 40mm 30mm;   /* Marklife P50: 40×30mm individual label */
+  margin: 0;
+}
+@page label-sheet-page {
+  size: letter portrait;  /* Hoja carta para autoadhesivas */
+  margin: 8mm;
+}
+
 @media print {
-  body * {
-    visibility: hidden;
+  /* Force exact color reproduction */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  
-  .print-area, .print-area * {
-    visibility: visible;
+
+  /* Hide screen-only containers and global layout elements entirely */
+  .screen-only,
+  .sidebar,
+  .header,
+  .modal-overlay,
+  button,
+  .btn {
+    display: none !important;
   }
-  
-  .print-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 0;
+
+  /* Show our print containers */
+  .print-only {
+    display: block !important;
+  }
+
+  /* Reset main layouts so they don't break page flow or sizes */
+  .app-container,
+  .main-content,
+  .page-container {
+    display: block !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: auto !important;
+    box-shadow: none !important;
     background: white !important;
   }
 
-  /* Sheet label page template: 40x30mm labels, 4 columns x 9 rows on letter */
-  .print-sheet {
-    display: grid;
-    grid-template-columns: repeat(4, 40mm);
-    grid-template-rows: repeat(9, 30mm);
-    gap: 2mm 3mm;
-    padding: 12mm 8mm;
-    width: 215.9mm; /* Letter width */
-    height: 279.4mm; /* Letter height */
-    box-sizing: border-box;
-    page-break-after: always;
-  }
-  
-  .print-sheet .antara-label {
-    width: 40mm;
-    height: 30mm;
-    border: 1px dashed #ccc;
-    page-break-inside: avoid;
-    overflow: hidden;
+  .print-only .print-area {
+    display: block !important;
+    position: static;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    color: #000 !important;
   }
 
-  /* Thermal roll printing — Marklife P50: 40x30mm */
-  @page {
-    size: 40mm 30mm;
-    margin: 0;
+  /* ─── Ticket — ZKTeco ZKP5803 (58mm thermal paper) ─── */
+  html.print-ticket {
+    page: ticket-page;
+  }
+
+  .ticket-print {
+    width: 54mm;          /* 58mm paper minus small margins */
+    max-width: 54mm;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10px;
+    line-height: 1.4;
+    padding: 1mm 2mm;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  .ticket-print * {
+    color: #000 !important;
+    background: transparent !important;
+  }
+
+  .ticket-print h3,
+  .ticket-print h4 {
+    margin: 1mm 0;
+  }
+
+  .ticket-print table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .ticket-print th,
+  .ticket-print td {
+    padding: 1px 0;
+    background: none !important;
+    color: #000 !important;
+    border: none;
+    font-size: 10px;
+  }
+
+  .ticket-print .text-center {
+    text-align: center;
+  }
+
+  .ticket-print .divider {
+    border-top: 1px dashed black;
+    margin: 4px 0;
+  }
+
+  /* ─── Thermal Labels — Marklife P50 (40×30mm per label) ─── */
+  html.print-label-thermal {
+    page: label-thermal-page;
   }
 
   .print-thermal {
@@ -657,25 +733,85 @@ tr:hover td {
     border: none;
     page-break-after: always;
     page-break-inside: avoid;
+    break-after: page;
+    break-inside: avoid;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1mm;
+    box-sizing: border-box;
   }
 
-  /* Thermal Ticket Printing — ZKP5803: 57mm paper */
-  .ticket-print {
-    width: 57mm;
-    max-width: 57mm;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 10px;
-    line-height: 1.4;
-    padding: 2px 3px;
+  .print-thermal .antara-label:last-child {
+    page-break-after: auto;
+    break-after: auto;
   }
 
-  .ticket-print .text-center {
-    text-align: center;
+  /* ─── Sheet Labels — Hoja carta autoadhesiva (4×9 grid) ─── */
+  html.print-label-sheet {
+    page: label-sheet-page;
   }
 
-  .ticket-print .divider {
-    border-top: 1px dashed black;
-    margin: 8px 0;
+  .print-sheet {
+    display: grid;
+    grid-template-columns: repeat(4, 40mm);
+    grid-template-rows: repeat(9, 30mm);
+    gap: 2mm 3mm;
+    padding: 4mm;
+    width: 215.9mm;
+    height: 279.4mm;
+    box-sizing: border-box;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .print-sheet:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .print-sheet .antara-label {
+    width: 40mm;
+    height: 30mm;
+    border: 0.5px dashed #ccc;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1mm;
+    box-sizing: border-box;
+  }
+
+  /* Common label text sizing for print */
+  .print-area .antara-label .label-title {
+    font-size: 7px;
+    font-weight: 800;
+  }
+  .print-area .antara-label .label-owner {
+    font-size: 5px;
+  }
+  .print-area .antara-label .label-product-name {
+    font-size: 7px;
+    font-weight: 700;
+  }
+  .print-area .antara-label .label-details {
+    font-size: 6px;
+  }
+  .print-area .antara-label .label-sku {
+    font-family: monospace;
+    font-size: 5px;
+  }
+  .print-area .antara-label .label-price {
+    font-weight: 800;
+    font-size: 9px;
+  }
+  .print-area .antara-label svg {
+    max-width: 100%;
+    height: auto;
   }
 }

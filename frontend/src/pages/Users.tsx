@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import type { User } from '../types';
-import { Plus, Edit2, Trash2, Shield, X, Key, UserPlus } from 'lucide-react';
+import { Edit2, Trash2, Shield, X, Key, UserPlus } from 'lucide-react';
 
 export const Users: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -22,7 +22,7 @@ export const Users: React.FC = () => {
     try {
       const data = await api.auth.getUsers();
       setUsers(data);
-    } catch (err) {
+    } catch {
       setError('Error al cargar la lista de personal de la tienda.');
     } finally {
       setLoading(false);
