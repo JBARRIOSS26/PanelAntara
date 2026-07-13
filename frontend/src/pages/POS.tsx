@@ -355,7 +355,8 @@ export const POS: React.FC = () => {
           display: 'flex', 
           gap: '0.75rem', 
           alignItems: 'center', 
-          backgroundColor: 'rgba(247, 245, 240, 0.6)' 
+          backgroundColor: 'rgba(247, 245, 240, 0.6)',
+          flexShrink: 0
         }}>
           <User size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
           <select 
@@ -496,7 +497,7 @@ export const POS: React.FC = () => {
           )}
 
           {/* Subtotals & tax desglose */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.85rem', marginBottom: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.6rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: 'var(--text-muted)' }}>Subtotal:</span>
               <span style={{ fontWeight: 500 }}>{formatCurrency(cartTotals.subtotal)}</span>
@@ -529,20 +530,20 @@ export const POS: React.FC = () => {
               <span style={{ fontWeight: 500 }}>{formatCurrency(cartTotals.taxAmount)}</span>
             </div>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.3rem', fontWeight: 800, marginTop: '0.5rem', color: 'var(--primary)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', fontWeight: 800, marginTop: '0.25rem', color: 'var(--primary)' }}>
               <span>Total:</span>
               <span>{formatCurrency(cartTotals.total)}</span>
             </div>
           </div>
 
           {/* Payment selector */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
-            <label className="form-label" style={{ marginBottom: '0.25rem', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Método de Pago</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '0.75rem' }}>
+            <label className="form-label" style={{ marginBottom: '0.15rem', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Método de Pago</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
               <button 
                 type="button" 
                 className={`btn ${paymentMethod === 'cash' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ padding: '0.5rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
+                style={{ padding: '0.4rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
                 onClick={() => setPaymentMethod('cash')}
               >
                 Efectivo
@@ -550,7 +551,7 @@ export const POS: React.FC = () => {
               <button 
                 type="button" 
                 className={`btn ${paymentMethod === 'card' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ padding: '0.5rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
+                style={{ padding: '0.4rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
                 onClick={() => setPaymentMethod('card')}
               >
                 Tarjeta
@@ -558,7 +559,7 @@ export const POS: React.FC = () => {
               <button 
                 type="button" 
                 className={`btn ${paymentMethod === 'transfer' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ padding: '0.5rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
+                style={{ padding: '0.4rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
                 onClick={() => setPaymentMethod('transfer')}
               >
                 Transferencia
@@ -566,7 +567,7 @@ export const POS: React.FC = () => {
               <button 
                 type="button" 
                 className={`btn ${paymentMethod === 'mixed' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ padding: '0.5rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
+                style={{ padding: '0.4rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
                 onClick={() => setPaymentMethod('mixed')}
               >
                 Mixto
@@ -579,10 +580,10 @@ export const POS: React.FC = () => {
             <div style={{ 
               display: 'flex', 
               flexDirection: 'column', 
-              gap: '0.5rem', 
-              marginBottom: '1.25rem', 
+              gap: '0.4rem', 
+              marginBottom: '0.75rem', 
               backgroundColor: 'rgba(247, 245, 240, 0.9)', 
-              padding: '0.85rem', 
+              padding: '0.65rem', 
               borderRadius: 'var(--radius-md)',
               border: '1px solid var(--border-color)'
             }}>
@@ -745,7 +746,7 @@ export const POS: React.FC = () => {
               </button>
             </div>
             
-            <div className="modal-body" style={{ backgroundColor: '#fff', color: '#000', padding: '1rem', maxHeight: '60vh', overflowY: 'auto' }}>
+            <div className="modal-body" style={{ backgroundColor: '#fff', color: '#000', padding: '1rem' }}>
               {/* On-screen preview (NOT printed — the hidden container below is) */}
               <div style={{ margin: '0 auto', fontFamily: 'monospace', fontSize: '12px', maxWidth: '300px' }}>
                 <div style={{ textAlign: 'center' }}>
@@ -845,8 +846,18 @@ export const POS: React.FC = () => {
       {printedSale && (
         <div className="print-only">
           <div className="print-area ticket-print">
-            <div style={{ textAlign: 'center' }}>
-              <h3 style={{ fontSize: '14px', fontWeight: 800, margin: '2px 0' }}>{settings.store_name || 'ANTARA'}</h3>
+            <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+              <img 
+                src="/LogoAntara.jpeg" 
+                alt="Logo" 
+                style={{ 
+                  maxHeight: '30px', 
+                  objectFit: 'contain', 
+                  marginBottom: '4px',
+                  /* Filtros para asegurar que se imprima nítido en térmicas (negro puro) */
+                  filter: 'grayscale(100%) contrast(200%)' 
+                }} 
+              />
               <p style={{ margin: 0, fontSize: '9px' }}>{settings.store_address || 'Av. Andrés Bello 12, CDMX'}</p>
               <p style={{ margin: 0, fontSize: '9px' }}>Tel: {settings.store_phone || '5512345678'}</p>
             </div>
@@ -883,37 +894,52 @@ export const POS: React.FC = () => {
               </tbody>
             </table>
             <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', paddingLeft: '35%' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Subtotal:</span>
-                <span>{formatCurrency(printedSale.subtotal)}</span>
-              </div>
-              {printedSale.discount > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Desc:</span>
-                  <span>-{formatCurrency(printedSale.discount)}</span>
-                </div>
-              )}
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>IVA:</span>
-                <span>{formatCurrency(printedSale.tax)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '11px' }}>
-                <span>TOTAL:</span>
-                <span>{formatCurrency(printedSale.total)}</span>
-              </div>
-            </div>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <tbody>
+                <tr>
+                  <td style={{ textAlign: 'left', padding: '1px 0', fontSize: '9px' }}>Subtotal:</td>
+                  <td style={{ textAlign: 'right', padding: '1px 0', fontSize: '9px' }}>{formatCurrency(printedSale.subtotal)}</td>
+                </tr>
+                {printedSale.discount > 0 && (
+                  <tr>
+                    <td style={{ textAlign: 'left', padding: '1px 0', fontSize: '9px' }}>Desc:</td>
+                    <td style={{ textAlign: 'right', padding: '1px 0', fontSize: '9px' }}>-{formatCurrency(printedSale.discount)}</td>
+                  </tr>
+                )}
+                <tr>
+                  <td style={{ textAlign: 'left', padding: '1px 0', fontSize: '9px' }}>IVA:</td>
+                  <td style={{ textAlign: 'right', padding: '1px 0', fontSize: '9px' }}>{formatCurrency(printedSale.tax)}</td>
+                </tr>
+                <tr className="total-row">
+                  <td style={{ textAlign: 'left', padding: '2px 0', fontSize: '11px', fontWeight: 800 }}>TOTAL:</td>
+                  <td style={{ textAlign: 'right', padding: '2px 0', fontSize: '11px', fontWeight: 800 }}>{formatCurrency(printedSale.total)}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <tbody>
+                <tr>
+                  <td style={{ textAlign: 'left', padding: '1px 0' }}>Pago:</td>
+                  <td style={{ textAlign: 'right', padding: '1px 0' }}>{printedSale.payment_method.toUpperCase()}</td>
+                </tr>
+                {printedSale.payment_method === 'cash' && (
+                  <>
+                    <tr>
+                      <td style={{ textAlign: 'left', padding: '1px 0' }}>Recibido:</td>
+                      <td style={{ textAlign: 'right', padding: '1px 0' }}>{formatCurrency(printedSale.cash_received)}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ textAlign: 'left', padding: '1px 0' }}>Cambio:</td>
+                      <td style={{ textAlign: 'right', padding: '1px 0' }}>{formatCurrency(printedSale.cash_received - printedSale.total)}</td>
+                    </tr>
+                  </>
+                )}
+              </tbody>
+            </table>
             <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
             <div style={{ textAlign: 'center' }}>
-              <p style={{ margin: '2px 0' }}>Pago: {printedSale.payment_method.toUpperCase()}</p>
-              {printedSale.payment_method === 'cash' && (
-                <>
-                  <p style={{ margin: 0 }}>Recibido: {formatCurrency(printedSale.cash_received)}</p>
-                  <p style={{ margin: 0 }}>Cambio: {formatCurrency(printedSale.cash_received - printedSale.total)}</p>
-                </>
-              )}
-              <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
-              <p style={{ fontStyle: 'italic', fontWeight: 600, fontSize: '9px' }}>{settings.ticket_footer || '¡Gracias por su compra en ANTARA!'}</p>
+              <p style={{ fontStyle: 'italic', fontSize: '9px' }}>{settings.ticket_footer || '¡Gracias por su compra en ANTARA!'}</p>
             </div>
           </div>
         </div>

@@ -389,48 +389,46 @@ export const Sales: React.FC = () => {
       {/* HIDDEN PRINT COMPONENT FOR RE-PRINTING TICKETS */}
       {selectedSale && (
         <div className="print-only">
-          <div className="print-area ticket-print" style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+          <div className="print-area ticket-print">
             <div style={{ textAlign: 'center' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{settings.store_name || 'ANTARA'}</h3>
-              {settings.store_address && <p style={{ margin: 0 }}>{settings.store_address}</p>}
-              {settings.store_phone && <p style={{ margin: 0 }}>Tel: {settings.store_phone}</p>}
-              <p style={{ margin: 0 }}>Venta #{selectedSale.id} (REIMPRESIÓN)</p>
-              <p style={{ margin: 0 }}>
-                Fecha: {new Date(selectedSale.created_at).toLocaleString('es-MX')}
-              </p>
+              <h3 style={{ fontSize: '14px', fontWeight: 800, margin: '2px 0' }}>{settings.store_name || 'ANTARA'}</h3>
+              {settings.store_address && <p style={{ margin: 0, fontSize: '9px' }}>{settings.store_address}</p>}
+              {settings.store_phone && <p style={{ margin: 0, fontSize: '9px' }}>Tel: {settings.store_phone}</p>}
+            </div>
+            <div style={{ borderTop: '1px dashed #000', margin: '3px 0' }} />
+            <div style={{ textAlign: 'center' }}>
+              <h4 style={{ margin: '2px 0', fontSize: '12px' }}>TICKET DE COMPRA</h4>
+              <p style={{ margin: 0 }}>Venta #{selectedSale.id} (REIMP.)</p>
+              <p style={{ margin: 0 }}>{new Date(selectedSale.created_at).toLocaleString('es-MX')}</p>
               <p style={{ margin: 0 }}>Atendido por: {selectedSale.user_username}</p>
               <p style={{ margin: 0 }}>Cliente: {selectedSale.client_name || 'Público General'}</p>
             </div>
-            
-            <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
-            
-            <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+            <div style={{ borderTop: '1px dashed #000', margin: '3px 0' }} />
+            <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
               <thead>
                 <tr style={{ borderBottom: '1px dashed #000' }}>
-                  <th style={{ textAlign: 'left', padding: '2px 0' }}>Desc</th>
-                  <th style={{ textAlign: 'center', padding: '2px 0' }}>Cant</th>
-                  <th style={{ textAlign: 'right', padding: '2px 0' }}>Total</th>
+                  <th style={{ textAlign: 'left', padding: '1px 0' }}>Desc</th>
+                  <th style={{ textAlign: 'center', padding: '1px 0' }}>Cant</th>
+                  <th style={{ textAlign: 'right', padding: '1px 0' }}>Total</th>
                 </tr>
               </thead>
               <tbody>
                 {(selectedSale.items || []).map((item: any, idx: number) => (
                   <tr key={idx}>
-                    <td style={{ padding: '4px 0', verticalAlign: 'top' }}>
+                    <td style={{ padding: '2px 0', verticalAlign: 'top' }}>
                       {item.product_name}
-                      <div style={{ fontSize: '10px', color: '#555' }}>
-                        Talla: {item.size || 'Única'} | Color: {item.color || 'N/A'}
+                      <div style={{ fontSize: '8px' }}>
+                        T: {item.size || 'Única'} | C: {item.color || 'N/A'}
                       </div>
                     </td>
-                    <td style={{ textAlign: 'center', padding: '4px 0' }}>{item.quantity}</td>
-                    <td style={{ textAlign: 'right', padding: '4px 0' }}>{formatCurrency(item.total)}</td>
+                    <td style={{ textAlign: 'center', padding: '2px 0', verticalAlign: 'top' }}>{item.quantity}</td>
+                    <td style={{ textAlign: 'right', padding: '2px 0', verticalAlign: 'top' }}>{formatCurrency(item.total)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            
-            <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', paddingLeft: '40%' }}>
+            <div style={{ borderTop: '1px dashed #000', margin: '3px 0' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', paddingLeft: '35%' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>Subtotal:</span>
                 <span>{formatCurrency(selectedSale.subtotal)}</span>
@@ -445,19 +443,17 @@ export const Sales: React.FC = () => {
                 <span>IVA:</span>
                 <span>{formatCurrency(selectedSale.tax)}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '13px' }}>
-                <span>Total:</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '11px' }}>
+                <span>TOTAL:</span>
                 <span>{formatCurrency(selectedSale.total)}</span>
               </div>
             </div>
-            
-            <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
-            
-            <div style={{ textAlign: 'center', fontSize: '10px' }}>
-              <p style={{ margin: 0 }}>Método de Pago: {selectedSale.payment_method.toUpperCase()}</p>
+            <div style={{ borderTop: '1px dashed #000', margin: '3px 0' }} />
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ margin: '2px 0' }}>Pago: {selectedSale.payment_method.toUpperCase()}</p>
               <p style={{ margin: 0 }}>Estado: {selectedSale.status.toUpperCase()}</p>
-              <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
-              <p style={{ fontStyle: 'italic', fontWeight: 600 }}>{settings.ticket_footer || '¡Gracias por su compra en ANTARA!'}</p>
+              <div style={{ borderTop: '1px dashed #000', margin: '3px 0' }} />
+              <p style={{ fontStyle: 'italic', fontWeight: 600, fontSize: '9px' }}>{settings.ticket_footer || '¡Gracias por su compra en ANTARA!'}</p>
             </div>
           </div>
         </div>

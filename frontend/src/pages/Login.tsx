@@ -33,14 +33,14 @@ export const Login: React.FC = () => {
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
+      background: 'linear-gradient(135deg, #09090b 0%, #27272a 100%)', /* Tema oscuro monocromático */
       padding: '1rem'
     }}>
       <div className="card" style={{
         width: '100%',
         maxWidth: '420px',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        backgroundColor: 'rgba(15, 23, 42, 0.75)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        backgroundColor: 'rgba(9, 9, 11, 0.85)',
         backdropFilter: 'blur(12px)',
         borderRadius: 'var(--radius-lg)',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
@@ -48,23 +48,19 @@ export const Login: React.FC = () => {
         padding: '2.5rem'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--primary) 0%, #a5b4fc 100%)',
-            marginBottom: '1rem',
-            boxShadow: '0 10px 15px -3px rgba(79, 70, 229, 0.3)'
-          }}>
-            <ShoppingCart size={30} color="#ffffff" />
-          </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.25rem', fontWeight: 800, letterSpacing: '0.05em', color: '#ffffff' }}>
-            ANTARA
-          </h1>
-          <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+          <img 
+            src="/LogoAntara.jpeg" 
+            alt="Antara Logo" 
+            style={{ 
+              maxWidth: '180px', 
+              maxHeight: '80px',
+              objectFit: 'contain',
+              marginBottom: '1rem',
+              filter: 'invert(1)',
+              mixBlendMode: 'screen' /* Elimina el fondo blanco del JPEG */
+            }} 
+          />
+          <p style={{ color: '#a1a1aa', fontSize: '0.875rem', marginTop: '0.5rem' }}>
             Sistema de Punto de Venta y Administración
           </p>
         </div>

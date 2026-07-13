@@ -231,7 +231,7 @@ export const Customers: React.FC = () => {
               Este cliente aún no ha realizado compras.
             </p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '500px', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {historySales.map((sale) => (
                 <div key={sale.id} style={{
                   border: '1px solid var(--border-color)',

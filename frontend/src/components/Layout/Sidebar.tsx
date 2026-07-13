@@ -95,9 +95,17 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-header" style={{ padding: '1.5rem 1rem' }}>
-        <ShoppingCart size={22} style={{ color: 'var(--primary)' }} />
-        <span className="sidebar-logo" style={{ color: 'var(--primary)', background: 'none', WebkitTextFillColor: 'unset' }}>ANTARA</span>
+      <div className="sidebar-header" style={{ padding: '1.5rem 1rem', display: 'flex', justifyContent: 'center' }}>
+        <img 
+          src="/LogoAntara.jpeg" 
+          alt="Antara Logo" 
+          style={{ 
+            maxHeight: '45px', 
+            objectFit: 'contain',
+            filter: 'invert(1)', 
+            mixBlendMode: 'screen' /* Truco para quitar el fondo blanco de un JPEG en fondos oscuros */
+          }} 
+        />
       </div>
 
       <nav className="sidebar-menu" style={{ padding: '1rem 0.5rem' }}>

@@ -4,28 +4,28 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   --font-display: 'Outfit', var(--font-sans);
 
-  /* Vintage/Modern boutique warm aesthetics (Opaque / Muted tones) */
-  --bg-app: #e8e3d9; /* Muted warm clay/sand gray */
-  --bg-sidebar: #2b2321; /* Rich warm dark soil */
-  --bg-card: #f7f5f0; /* Soft warm linen off-white */
-  --bg-hover: #edeae3;
-  --border-color: #dcd6cb;
+  /* Grayscale/Monochrome Boutique Aesthetics (blancos, negros, grises) */
+  --bg-app: #f4f4f5; /* Fondo general gris súper claro */
+  --bg-sidebar: #09090b; /* Negro puro casi absoluto */
+  --bg-card: #ffffff; /* Blanco puro para tarjetas */
+  --bg-hover: #e4e4e7; /* Gris suave para hover */
+  --border-color: #e4e4e7;
   
-  --text-main: #332927; /* Rich charcoal brown */
-  --text-muted: #756a67;
+  --text-main: #09090b; /* Texto casi negro */
+  --text-muted: #71717a; /* Gris intermedio para textos secundarios */
   --text-white: #ffffff;
   
-  --primary: #b57a67; /* Muted Terracotta */
-  --primary-hover: #9c6553;
-  --primary-light: #ebdcd7;
+  --primary: #18181b; /* Negro para botones primarios */
+  --primary-hover: #000000;
+  --primary-light: #e4e4e7;
   
-  --accent: #cf9c8e;
-  --success: #748779; /* Sage Green */
-  --success-light: #e3eae5;
-  --warning: #d3a268;
-  --warning-light: #faf3e8;
-  --danger: #cf7c7c;
-  --danger-light: #faecec;
+  --accent: #3f3f46;
+  --success: #22c55e; /* Mantener verde estándar para éxitos */
+  --success-light: #dcfce7;
+  --warning: #f59e0b; /* Mantener amarillo para advertencias */
+  --warning-light: #fef3c7;
+  --danger: #ef4444; /* Mantener rojo para errores */
+  --danger-light: #fee2e2;
   
   --shadow-sm: 0 1px 3px 0 rgba(43, 35, 33, 0.05);
   --shadow-md: 0 4px 12px -2px rgba(43, 35, 33, 0.08), 0 2px 6px -2px rgba(43, 35, 33, 0.04);
@@ -66,12 +66,36 @@
   padding: 0;
 }
 
+/* ─── Scrollbars delgados y sutiles en todo el sistema ─── */
+/* Evita las barras de scroll gruesas del OS que se ven en 3 capas a la vez */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-app);
   color: var(--text-main);
   line-height: 1.5;
-  overflow-x: hidden;
+  /* overflow-x:hidden en body — NO poner overflow-y aquí para evitar
+     que el body compita con main-content por el scroll principal */
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -95,38 +119,53 @@ button, input, select, textarea {
 /* App Layout Grid */
 .app-container {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
+/* main-content: contiene el header (fijo) + el área de scroll de la página.
+   height:100% + overflow-y:auto → SOLO main-content tiene la barra de scroll
+   principal. El body y el html quedan sin scroll propio. */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  height: 100vh;
-  overflow-y: auto;
+  height: 100%;
+  overflow: hidden; /* El scroll lo maneja .page-container, no main-content */
 }
 
+/* page-container es el que hace scroll — header siempre visible arriba.
+   max-width con margin:auto no funciona bien en un flex child con flex:1,
+   así que usamos padding inline para el efecto de centrado. */
 .page-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   padding: 2rem;
-  max-width: 1600px;
   width: 100%;
-  margin: 0 auto;
+  /* Centra el contenido sin romper el flex height */
+  box-sizing: border-box;
 }
 
 /* Sidebar Styling */
 .sidebar {
   width: 260px;
+  height: 100%;
   background-color: var(--bg-sidebar);
   color: var(--text-white);
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--border-color);
   z-index: 100;
+  /* Sin overflow-y aquí: el sidebar completo no debe scrollear.
+     Solo el .sidebar-menu interior scrollea si el menú es muy largo. */
+  overflow: hidden;
 }
 
 .sidebar-header {
   padding: 1.5rem;
+  flex-shrink: 0; /* Header del sidebar siempre visible */
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -145,6 +184,7 @@ button, input, select, textarea {
 
 .sidebar-menu {
   flex: 1;
+  min-height: 0; /* Necesario para que flex+overflow funcione correctamente */
   padding: 1.5rem 0.75rem;
   display: flex;
   flex-direction: column;
@@ -175,6 +215,7 @@ button, input, select, textarea {
 
 .sidebar-footer {
   padding: 1rem 1.5rem;
+  flex-shrink: 0; /* Footer del sidebar siempre visible */
   border-top: 1px solid rgba(255,255,255,0.08);
   display: flex;
   flex-direction: column;
@@ -366,27 +407,32 @@ tr:hover td {
 /* Modal */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background-color: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Padding para que el modal no toque los bordes en pantallas pequeñas */
+  padding: 1rem;
   z-index: 1000;
   animation: fadeIn 0.2s ease-out;
 }
 
+/* modal-content usa flex column para que header y footer sean sticky
+   y SOLO el body haga scroll → elimina la barra de scroll del overlay */
 .modal-content {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 600px;
+  /* max-height con dvh para compatibilidad móvil, fallback con vh */
+  max-height: min(90vh, 860px);
   box-shadow: var(--shadow-lg);
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* El overflow lo maneja .modal-body, no el contenedor */
   animation: scaleUp 0.2s ease-out;
 }
 
@@ -394,31 +440,44 @@ tr:hover td {
   max-width: 900px;
 }
 
+/* Header pegado arriba — nunca desaparece al scrollear */
 .modal-header {
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 }
 
+/* Solo el body hace scroll */
 .modal-body {
   padding: 1.5rem;
-  max-height: 70vh;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
+/* Footer pegado abajo — siempre visible con los botones de acción */
 .modal-footer {
   padding: 1.25rem 1.5rem;
   border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 /* Point Of Sale (POS) layout split */
-.pos-layout {
+.pos-page-wrapper {
   height: calc(100vh - 70px);
+  overflow: hidden;
+  width: 100%;
+}
+
+.pos-layout {
+  height: 100%;
   overflow: hidden;
   position: relative;
 }
@@ -438,26 +497,28 @@ tr:hover td {
   flex-direction: column;
   background-color: var(--bg-card);
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   border-left: 1px solid var(--border-color);
   box-shadow: -4px 0 16px rgba(43, 35, 33, 0.04);
 }
 
 .pos-cart-list {
   flex: 1;
+  min-height: 110px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 1.25rem 1rem;
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.5rem;
 }
 
 .pos-cart-item {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
-  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
@@ -471,10 +532,11 @@ tr:hover td {
 }
 
 .pos-checkout {
-  padding: 1.5rem;
+  padding: 1rem;
   border-top: 1px solid var(--border-color);
   background-color: var(--bg-card);
   box-shadow: 0 -4px 16px rgba(43, 35, 33, 0.02);
+  flex-shrink: 0;
 }
 
 /* Styled Compact Inputs & Buttons for POS Cart */
@@ -580,11 +642,11 @@ tr:hover td {
   box-sizing: border-box;
 }
 
-/* Thermal Size Label */
+/* Thermal Size Label — 40x30mm coincide exactamente con la etiqueta física Marklife P50 */
 .antara-label.thermal {
-  width: 50mm;
+  width: 40mm;
   height: 30mm;
-  padding: 4px;
+  padding: 3px;
 }
 
 /* Avery Carta Size Label */
@@ -666,11 +728,11 @@ tr:hover td {
 /* --- Named @page rules for each printer --- */
 @page ticket-page {
   size: 58mm auto;   /* ZKTeco ZKP5803: 58mm width, continuous length */
-  margin: 0mm 1mm;
+  margin: 0;         /* Sin margen en @page, centramos con CSS interior */
 }
 @page label-thermal-page {
   size: 40mm 30mm;   /* Marklife P50: 40×30mm individual label */
-  margin: 0;
+  margin: 0;         /* Sin márgenes para no generar offset extra */
 }
 @page label-sheet-page {
   size: letter portrait;  /* Hoja carta para autoadhesivas */
@@ -678,10 +740,31 @@ tr:hover td {
 }
 
 @media print {
-  /* Force exact color reproduction */
+  /* ─── Fix #1: Evitar papel extra por alturas residuales del layout ─── */
+  /* html y body pueden heredar min-height:100vh del layout de pantalla;
+     forzarlos a auto evita que la impresora reciba una "página" más alta
+     que el contenido real del ticket. */
+  html,
+  body {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  /* ─── Fix #2: Calidad de impresión ─── */
+  /* Desactivar sub-pixel rendering y antialiasing que emborronan
+     el texto en impresoras térmicas de baja resolución (203 dpi).
+     "optimizeSpeed" prioriza bordes más nítidos sobre suavidad. */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    -webkit-font-smoothing: none;
+    font-smooth: never;
+    text-rendering: optimizeSpeed;
   }
 
   /* Hide screen-only containers and global layout elements entirely */
@@ -699,19 +782,26 @@ tr:hover td {
     display: block !important;
   }
 
-  /* Reset main layouts so they don't break page flow or sizes */
+  /* ─── Fix #3: Reset completo de contenedores del layout ─── */
+  /* Incluir overflow:hidden para que no se cuente espacio invisible fuera del flujo */
   .app-container,
   .main-content,
-  .page-container {
+  .page-container,
+  .pos-page-wrapper,
+  .pos-layout {
     display: block !important;
     position: static !important;
     margin: 0 !important;
     padding: 0 !important;
     width: auto !important;
     height: auto !important;
-    min-height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
     box-shadow: none !important;
     background: white !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
   }
 
   .print-only .print-area {
@@ -730,29 +820,48 @@ tr:hover td {
   }
 
   .ticket-print {
-    width: 54mm;          /* 58mm paper minus small margins */
-    max-width: 54mm;
+    width: 48mm !important;
+    max-width: 48mm !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;              /* Quitamos el auto, forzamos inicio desde la izquierda */
+    padding: 0 1mm 0 5mm !important;   /* PUSH: 5mm a la derecha para evitar el corte izquierdo */
+    /* ─── Calidad tipográfica para térmica ───
+       Courier New monoespaciada → columnas alineadas.
+       font-weight 700 en todo el texto → mayor densidad de tinta → letras más negras. */
     font-family: 'Courier New', Courier, monospace;
-    font-size: 10px;
-    line-height: 1.4;
-    padding: 1mm 2mm;
+    font-size: 9px;
+    font-weight: 700;          /* Negrita base → impresión más oscura y nítida */
+    line-height: 1.3;
+    overflow: hidden;
+    padding: 0;
     color: #000 !important;
     background: #fff !important;
+    letter-spacing: 0;
+    word-spacing: 0;
   }
 
   .ticket-print * {
     color: #000 !important;
     background: transparent !important;
+    font-weight: 700 !important;    /* Todo el texto en negrita → más tinta → más negro */
+    /* Forzar negro puro (#000) en todos los elementos del ticket.
+       Las impresoras térmicas interpretan colores grises como grises reales
+       (tramado de puntos), lo que reduce la densidad y legibilidad. */
   }
 
+  /* Títulos y totales aún más pesados */
   .ticket-print h3,
-  .ticket-print h4 {
-    margin: 1mm 0;
+  .ticket-print h4,
+  .ticket-print .total-row td {
+    font-weight: 900 !important;
+    margin: 0.5mm 0;
+    letter-spacing: 0.5px;
   }
 
   .ticket-print table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: auto;   /* auto: el navegador calcula el ancho real de cada columna */
   }
 
   .ticket-print th,
@@ -761,7 +870,18 @@ tr:hover td {
     background: none !important;
     color: #000 !important;
     border: none;
-    font-size: 10px;
+    font-size: 9px;
+    /* Permitir wrap para que el texto no se corte — en térmica de 58mm
+       es preferible que el texto baje a una línea extra que que se trunque */
+    overflow: visible;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* La columna de descripción sí puede hacer wrap (es la más importante) */
+  .ticket-print td:first-child {
+    white-space: normal;
+    word-break: break-word;
   }
 
   .ticket-print .text-center {
@@ -770,7 +890,7 @@ tr:hover td {
 
   .ticket-print .divider {
     border-top: 1px dashed black;
-    margin: 4px 0;
+    margin: 3px 0;
   }
 
   /* ─── Thermal Labels — Marklife P50 (40×30mm per label) ─── */
@@ -847,31 +967,149 @@ tr:hover td {
     box-sizing: border-box;
   }
 
-  /* Common label text sizing for print */
-  .print-area .antara-label .label-title {
-    font-size: 7px;
-    font-weight: 800;
+  /* ══════════════════════════════════════════════════════════
+     ETIQUETA TÉRMICA — Marklife P50  (40 × 30 mm)
+     Toda regla usa !important para ganar frente a inline styles
+     del JSX. Unidades en pt (1pt = 1/72in) son más predecibles
+     en impresoras físicas que px.
+     ══════════════════════════════════════════════════════════ */
+
+  /* Wrapper de página — una etiqueta por página */
+  .print-thermal {
+    display: block !important;
+    width: 40mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
-  .print-area .antara-label .label-owner {
-    font-size: 5px;
+
+  /* Cada etiqueta ocupa exactamente una página de 40×30mm */
+  .print-thermal .antara-label.lbl-print {
+    width: 40mm !important;
+    height: 30mm !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    padding: 4mm 1mm 1mm 7.5mm !important;   /* PUSH FUERTE: 4mm top, 7.5mm left, 1mm right/bottom */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 2pt !important;             /* Mayor separación entre elementos */
+    overflow: hidden !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    background: #fff !important;
+    color: #000 !important;
+    font-family: 'Arial Narrow', Arial, sans-serif !important;
   }
-  .print-area .antara-label .label-product-name {
-    font-size: 7px;
-    font-weight: 700;
+
+  .print-thermal .antara-label.lbl-print:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
   }
-  .print-area .antara-label .label-details {
-    font-size: 6px;
+
+  /* ── Header: ANTARA  |  [DUEÑO] ── */
+  .print-thermal .lbl-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    border-bottom: 0.5pt solid #000 !important;
+    padding-bottom: 0.5mm !important;
+    margin-bottom: 0 !important;
+    line-height: 1 !important;
   }
-  .print-area .antara-label .label-sku {
-    font-family: monospace;
-    font-size: 5px;
+
+  .print-thermal .label-title {
+    font-size: 7pt !important;
+    font-weight: bold !important;
+    letter-spacing: 0.3px !important;
+    line-height: 1 !important;
   }
-  .print-area .antara-label .label-price {
-    font-weight: 800;
-    font-size: 9px;
+
+  .print-thermal .label-owner {
+    font-size: 9pt !important;        /* Más grande para la inicial */
+    font-weight: bold !important;
+    border: 0.75pt solid #000 !important;
+    padding: 0 3px !important;
+    border-radius: 1px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
   }
-  .print-area .antara-label svg {
-    max-width: 100%;
-    height: auto;
+
+  /* ── Nombre del producto ── */
+  .print-thermal .label-product-name {
+    font-size: 8pt !important;
+    font-weight: 800 !important;
+    text-align: center !important;
+    line-height: 1.15 !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+    margin: 0 !important;
   }
+
+  /* ── Talla y Color ── */
+  .print-thermal .label-details {
+    display: flex !important;
+    gap: 4px !important;
+    justify-content: center !important;
+    font-size: 7.5pt !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    margin: 0 !important;
+  }
+
+  /* ── Código de barras — delgado para liberar espacio ── */
+  .print-thermal svg.label-barcode-svg {
+    width: 100% !important;
+    height: 24pt !important;      /* Aprovechando espacio vertical */
+    display: block !important;
+    overflow: hidden !important;
+  }
+
+  /* ── Footer: SKU | Precio — tabla para garantizar que el precio no se corte ── */
+  .print-thermal .lbl-footer-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-thermal .lbl-footer-table td {
+    padding: 0 !important;
+    border: none !important;
+    background: none !important;
+    color: #000 !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+  }
+
+  /* SKU: columna izquierda, ocupa 60%, se trunca si es largo */
+  .print-thermal .label-sku {
+    font-family: 'Courier New', monospace !important;
+    font-size: 5pt !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: table-cell !important;
+    width: 60% !important;
+    text-align: left !important;
+  }
+
+  /* Precio: columna derecha, 40%, siempre visible, nunca se recorta */
+  .print-thermal .label-price {
+    font-size: 11pt !important;
+    font-weight: 900 !important;
+    text-align: right !important;
+    display: table-cell !important;
+    width: 40% !important;
+    white-space: nowrap !important;
+  }
+
+  /* ══ Hoja carta autoadhesiva (4×9 grid) — sin cambios ══ */
 }

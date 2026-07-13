@@ -35,10 +35,10 @@ const BarcodeCode39: React.FC<{ value: string }> = ({ value }) => {
   const cleanValue = (value || '').toUpperCase();
   const starValue = `*${cleanValue}*`;
   
-  let currentX = 0;
-  const narrowWidth = 1.5;
-  const wideWidth = 4.5;
-  const charSpacing = 2.0;
+  let currentX = 20; // Margen blanco inicial más grande (Quiet Zone)
+  const narrowWidth = 2.0; // Barras más gruesas para mayor legibilidad del láser
+  const wideWidth = 6.0;
+  const charSpacing = 2.5;
 
   const rects: React.ReactNode[] = [];
 
@@ -61,6 +61,7 @@ const BarcodeCode39: React.FC<{ value: string }> = ({ value }) => {
             width={width} 
             height={30} 
             fill="#000000" 
+            stroke="none"
           />
         );
       }
@@ -69,8 +70,14 @@ const BarcodeCode39: React.FC<{ value: string }> = ({ value }) => {
     currentX += charSpacing; // space between characters
   }
 
+  const totalWidth = currentX + 20; // Margen blanco final más grande
+
   return (
-    <svg viewBox={`0 0 ${currentX} 30`} preserveAspectRatio="none" className="label-barcode-svg">
+    <svg 
+      viewBox={`0 0 ${totalWidth} 30`} 
+      preserveAspectRatio="none" 
+      className="label-barcode-svg"
+    >
       {rects}
     </svg>
   );
@@ -397,33 +404,25 @@ export const Labels: React.FC = () => {
               <div 
                 key={idx} 
                 className={`antara-label ${labelSize === 'thermal' ? 'thermal' : 'sheet'}`}
-                style={{
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-                  margin: '5px auto'
-                }}
+                style={{ boxShadow: '0 2px 5px rgba(0,0,0,0.1)', margin: '5px auto' }}
               >
-                {/* Logo and Partner Owner Header */}
+                {/* Header: ANTARA | inicial del dueño */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', borderBottom: '1px solid #ddd', paddingBottom: '2px', marginBottom: '2px' }}>
                   <span className="label-title" style={{ fontSize: '8px' }}>ANTARA</span>
-                  <span className="label-owner" style={{ fontSize: '6px', border: '1px solid #000', padding: '0px 2px', borderRadius: '2px' }}>
-                    {lbl.ownerName}
+                  <span className="label-owner" style={{ fontSize: '7px', border: '1px solid #000', padding: '0px 3px', borderRadius: '2px', fontWeight: 800 }}>
+                    {(lbl.ownerName || 'A').charAt(0).toUpperCase()}
                   </span>
                 </div>
-
-                {/* Product Info */}
+                {/* Nombre del producto */}
                 <div className="label-product-name" style={{ fontSize: '8px', fontWeight: 700 }}>{lbl.productName}</div>
-                
-                {/* Size and Color Details */}
-                <div className="label-details" style={{ fontSize: '7px', color: '#555' }}>
-                  <span>Talla: {lbl.size}</span>
-                  <span>Color: {lbl.color}</span>
+                {/* Solo Talla */}
+                <div className="label-details" style={{ fontSize: '7px' }}>
+                  <span>T: {lbl.size}</span>
                 </div>
-
-                {/* Code 39 Barcode render path */}
+                {/* Código de barras */}
                 <BarcodeCode39 value={lbl.barcode} />
-
-                {/* SKU and Price footer */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '2px' }}>
+                {/* SKU y Precio */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '1px' }}>
                   <span className="label-sku" style={{ fontFamily: 'monospace', fontSize: '6px' }}>{lbl.sku}</span>
                   <span className="label-price" style={{ fontWeight: 800, fontSize: '10px' }}>${lbl.price}</span>
                 </div>
@@ -462,24 +461,34 @@ export const Labels: React.FC = () => {
               </div>
             ))
           ) : (
-            // Thermal Roll List
+            // Thermal Roll List — sin inline fontSize para que el CSS de impresión mande
             <div className="print-thermal">
               {flatLabels.map((lbl, idx) => (
-                <div key={idx} className="antara-label thermal">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', borderBottom: '1px solid #000', paddingBottom: '2px', marginBottom: '2px' }}>
-                    <span className="label-title" style={{ fontSize: '8px' }}>ANTARA</span>
-                    <span className="label-owner" style={{ fontSize: '6px' }}>{lbl.ownerName}</span>
+                <div key={idx} className="antara-label thermal lbl-print">
+                  {/* Header: ANTARA | sólo la inicial del dueño */}
+                  <div className="lbl-header">
+                    <span className="label-title">ANTARA</span>
+                    <span className="label-owner">
+                      {(lbl.ownerName || 'A').charAt(0).toUpperCase()}
+                    </span>
                   </div>
-                  <div className="label-product-name" style={{ fontSize: '8px' }}>{lbl.productName}</div>
-                  <div className="label-details" style={{ fontSize: '7px' }}>
+                  {/* Nombre del producto */}
+                  <div className="label-product-name">{lbl.productName}</div>
+                  {/* Solo talla — sin color */}
+                  <div className="label-details">
                     <span>T: {lbl.size}</span>
-                    <span>C: {lbl.color}</span>
                   </div>
+                  {/* Código de barras */}
                   <BarcodeCode39 value={lbl.barcode} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '2px' }}>
-                    <span className="label-sku" style={{ fontSize: '6px' }}>{lbl.sku}</span>
-                    <span className="label-price" style={{ fontSize: '9px' }}>${lbl.price}</span>
-                  </div>
+                  {/* SKU | Precio */}
+                  <table className="lbl-footer-table">
+                    <tbody>
+                      <tr>
+                        <td className="label-sku">{lbl.sku}</td>
+                        <td className="label-price">${lbl.price}</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               ))}
             </div>

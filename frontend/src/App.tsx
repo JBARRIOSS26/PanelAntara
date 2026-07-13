@@ -44,7 +44,7 @@ const MainLayout: React.FC = () => {
       <Sidebar />
       <div className="main-content">
         <Header />
-        <main className="page-container">
+        <main className={activePage === 'pos' ? 'pos-page-wrapper' : 'page-container'}>
           {renderPage()}
         </main>
       </div>
