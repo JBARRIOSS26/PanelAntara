@@ -38,6 +38,8 @@ export class ProductRepository {
     if (filters.status !== undefined) {
       query += ' AND p.status = ?';
       params.push(filters.status);
+    } else {
+      query += ' AND p.status = 1';
     }
     if (filters.search) {
       // Search in product name, SKU, or barcode
@@ -311,6 +313,14 @@ export class ProductRepository {
 
   static async delete(id: number): Promise<void> {
     const db = await getDB();
-    await db.run('DELETE FROM products WHERE id = ?', [id]);
+    await db.run('BEGIN TRANSACTION');
+    try {
+      await db.run('UPDATE products SET status = 0 WHERE id = ?', [id]);
+      await db.run('UPDATE product_variants SET status = 0 WHERE product_id = ?', [id]);
+      await db.run('COMMIT');
+    } catch (error) {
+      await db.run('ROLLBACK');
+      throw error;
+    }
   }
 }
