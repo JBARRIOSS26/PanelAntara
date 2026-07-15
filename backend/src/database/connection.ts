@@ -8,7 +8,8 @@ let db: Database | null = null;
 export async function getDB(): Promise<Database> {
   if (db) return db;
 
-  const dbPath = path.join(__dirname, '../../database.sqlite');
+  // Railway enviará DATABASE_PATH apuntando a un Volumen Persistente
+  const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '../../database.sqlite');
   db = await open({
     filename: dbPath,
     driver: sqlite3.Database

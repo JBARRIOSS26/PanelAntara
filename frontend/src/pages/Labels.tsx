@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import JsBarcode from 'jsbarcode';
 import api from '../services/api';
 import type { Product } from '../types';
 import { Trash2, Printer } from 'lucide-react';
@@ -16,70 +17,53 @@ interface BatchLabelItem {
   copies: number;
 }
 
-// Code 39 Barcode Generator in pure TypeScript / React
-const CODE39_MAP: Record<string, string> = {
-  '0': '000110100', '1': '100100001', '2': '001100001', '3': '101100000',
-  '4': '000110001', '5': '100110000', '6': '001110000', '7': '000100101',
-  '8': '100100100', '9': '001100100', 'A': '100001001', 'B': '001001001',
-  'C': '101001000', 'D': '000011001', 'E': '100011000', 'F': '001011000',
-  'G': '000001101', 'H': '100001100', 'I': '001001100', 'J': '000011100',
-  'K': '100000011', 'L': '001000011', 'M': '101000010', 'N': '000010011',
-  'O': '100010010', 'P': '001010010', 'Q': '000000111', 'R': '100000110',
-  'S': '001000110', 'T': '000010110', 'U': '110000001', 'V': '011000001',
-  'W': '111000000', 'X': '010010001', 'Y': '110010000', 'Z': '011010000',
-  '-': '010000101', '.': '110000100', ' ': '011000100', '*': '010010100',
-  '$': '010101000', '/': '010100010', '+': '010001010', '%': '000101010'
-};
-
 const BarcodeCode39: React.FC<{ value: string }> = ({ value }) => {
   const cleanValue = (value || '').toUpperCase();
-  const starValue = `*${cleanValue}*`;
-  
-  let currentX = 20; // Margen blanco inicial más grande (Quiet Zone)
-  const narrowWidth = 2.0; // Barras más gruesas para mayor legibilidad del láser
-  const wideWidth = 6.0;
-  const charSpacing = 2.5;
+  const [imgSrc, setImgSrc] = useState<string>('');
 
-  const rects: React.ReactNode[] = [];
-
-  for (let c = 0; c < starValue.length; c++) {
-    const char = starValue[c];
-    const pattern = CODE39_MAP[char];
-    if (!pattern) continue;
-
-    for (let i = 0; i < 9; i++) {
-      const isBlack = i % 2 === 0;
-      const isWide = pattern[i] === '1';
-      const width = isWide ? wideWidth : narrowWidth;
-
-      if (isBlack) {
-        rects.push(
-          <rect 
-            key={`${c}-${i}`} 
-            x={currentX} 
-            y={0} 
-            width={width} 
-            height={30} 
-            fill="#000000" 
-            stroke="none"
-          />
-        );
-      }
-      currentX += width;
+  useEffect(() => {
+    if (!cleanValue) return;
+    try {
+      const canvas = document.createElement('canvas');
+      // ¡CRÍTICO! Generar en escala 1:1 exacta para evitar interpolación del navegador.
+      // Si la imagen se escala con CSS, el navegador crea píxeles grises que el
+      // driver de la impresora convierte en sombras punteadas (efecto encimado).
+      JsBarcode(canvas, cleanValue, {
+        format: 'CODE39',
+        width: 1,  // 1 píxel estricto por barra estrecha
+        height: 35, // Altura exacta sin necesidad de CSS
+        displayValue: false,
+        margin: 8,  // Zona de silencio mínima requerida
+        background: '#ffffff',
+        lineColor: '#000000'
+      });
+      setImgSrc(canvas.toDataURL('image/png'));
+    } catch (err) {
+      console.error('Error generando código de barras:', err);
     }
-    currentX += charSpacing; // space between characters
-  }
+  }, [cleanValue]);
 
-  const totalWidth = currentX + 20; // Margen blanco final más grande
+  if (!imgSrc) return <div style={{ height: '32px' }} />;
 
   return (
-    <svg 
-      viewBox={`0 0 ${totalWidth} 30`} 
-      preserveAspectRatio="none" 
-      className="label-barcode-svg"
+    <div
+      className="label-barcode-img-container"
+      style={{
+        display: 'flex',
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+      }}
     >
-      {rects}
-    </svg>
+      <img 
+        src={imgSrc} 
+        alt={cleanValue}
+        style={{
+          display: 'block' // Evita espacio fantasma debajo de la imagen
+        }} 
+      />
+    </div>
   );
 };
 
@@ -88,10 +72,11 @@ export const Labels: React.FC = () => {
   const [selectedProductId, setSelectedProductId] = useState('');
   const [selectedVariantId, setSelectedVariantId] = useState('');
   const [copies, setCopies] = useState<number>(1);
-  
+
   // Printing Configuration
   const [labelSize, setLabelSize] = useState<'thermal' | 'sheet'>('thermal');
   const [batch, setBatch] = useState<BatchLabelItem[]>([]);
+
   const loadData = async () => {
     try {
       const data = await api.products.list();
@@ -118,12 +103,16 @@ export const Labels: React.FC = () => {
     const variant = prod?.variants.find(v => v.id === parseInt(selectedVariantId, 10));
 
     if (prod && variant) {
+      // Código corto: ID numérico cero-padded a 8 dígitos.
+      // Más corto = barras más gruesas en 40mm = escaner lee mejor.
+      // El sistema identifica la prenda por este ID en /api/products/variants/:id
+      const shortCode = String(variant.id).padStart(8, '0');
       const newItem: BatchLabelItem = {
-        id: Date.now() + Math.random(), // local unique ID
+        id: Date.now() + Math.random(),
         productName: prod.name,
         variantId: variant.id,
         sku: variant.sku || `SKU-${variant.id}`,
-        barcode: variant.barcode || variant.sku || `BAR-${variant.id}`,
+        barcode: shortCode,
         size: variant.size || 'Única',
         color: variant.color || 'N/A',
         price: variant.sell_price,
@@ -147,7 +136,7 @@ export const Labels: React.FC = () => {
         productName: prod.name,
         variantId: v.id,
         sku: v.sku || `SKU-${v.id}`,
-        barcode: v.barcode || v.sku || `BAR-${v.id}`,
+        barcode: String(v.id).padStart(8, '0'), // Código corto numérico
         size: v.size || 'Única',
         color: v.color || 'N/A',
         price: v.sell_price,
@@ -184,11 +173,9 @@ export const Labels: React.FC = () => {
   };
 
   const triggerPrint = () => {
-    // Set the correct @page rule based on selected label format
     const printClass = labelSize === 'thermal' ? 'print-label-thermal' : 'print-label-sheet';
     document.documentElement.classList.add(printClass);
     window.print();
-    // Clean up after print dialog closes
     document.documentElement.classList.remove(printClass);
   };
 
@@ -269,7 +256,7 @@ export const Labels: React.FC = () => {
         {/* Right Side: Printing configuration */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <h3 style={{ fontSize: '1.15rem' }}>Formato de Impresión</h3>
-          
+
           <div className="form-group">
             <label className="form-label">Tamaño / Dispositivo</label>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -308,6 +295,9 @@ export const Labels: React.FC = () => {
                 <span>{Math.ceil(flatLabels.length / 36)}</span>
               </div>
             )}
+            <div style={{ fontSize: '0.75rem', color: 'var(--success, #22c55e)', marginTop: '0.25rem' }}>
+              ✓ Motor de código de barras HTML de alta fidelidad activo
+            </div>
           </div>
 
           <button
@@ -316,8 +306,7 @@ export const Labels: React.FC = () => {
             disabled={flatLabels.length === 0}
             onClick={triggerPrint}
           >
-            <Printer size={18} />
-            <span>Imprimir Lote ({flatLabels.length})</span>
+            <Printer size={18} /><span>Imprimir Lote ({flatLabels.length})</span>
           </button>
         </div>
       </div>
@@ -406,25 +395,15 @@ export const Labels: React.FC = () => {
                 className={`antara-label ${labelSize === 'thermal' ? 'thermal' : 'sheet'}`}
                 style={{ boxShadow: '0 2px 5px rgba(0,0,0,0.1)', margin: '5px auto' }}
               >
-                {/* Header: ANTARA | inicial del dueño */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', borderBottom: '1px solid #ddd', paddingBottom: '2px', marginBottom: '2px' }}>
-                  <span className="label-title" style={{ fontSize: '8px' }}>ANTARA</span>
-                  <span className="label-owner" style={{ fontSize: '7px', border: '1px solid #000', padding: '0px 3px', borderRadius: '2px', fontWeight: 800 }}>
-                    {(lbl.ownerName || 'A').charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                {/* Nombre del producto */}
-                <div className="label-product-name" style={{ fontSize: '8px', fontWeight: 700 }}>{lbl.productName}</div>
                 {/* Solo Talla */}
-                <div className="label-details" style={{ fontSize: '7px' }}>
-                  <span>T: {lbl.size}</span>
+                <div className="label-details" style={{ fontSize: '8px' }}>
+                  <span>Size: {lbl.size}</span>
                 </div>
                 {/* Código de barras */}
                 <BarcodeCode39 value={lbl.barcode} />
-                {/* SKU y Precio */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '1px' }}>
-                  <span className="label-sku" style={{ fontFamily: 'monospace', fontSize: '6px' }}>{lbl.sku}</span>
-                  <span className="label-price" style={{ fontWeight: 800, fontSize: '10px' }}>${lbl.price}</span>
+                {/* Precio */}
+                <div style={{ width: '100%', textAlign: 'center', marginTop: '1px' }}>
+                  <span className="label-price" style={{ fontSize: '11px' }}>${lbl.price}</span>
                 </div>
               </div>
             ))}
@@ -442,18 +421,14 @@ export const Labels: React.FC = () => {
               <div key={sheetIdx} className="print-sheet">
                 {flatLabels.slice(sheetIdx * 36, (sheetIdx + 1) * 36).map((lbl, idx) => (
                   <div key={idx} className="antara-label sheet">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', borderBottom: '1px solid #000', paddingBottom: '2px', marginBottom: '2px' }}>
-                      <span className="label-title">ANTARA</span>
-                      <span className="label-owner">{lbl.ownerName}</span>
-                    </div>
-                    <div className="label-product-name">{lbl.productName}</div>
+                    {/* Solo Talla */}
                     <div className="label-details">
-                      <span>Talla: {lbl.size}</span>
-                      <span>Color: {lbl.color}</span>
+                      <span>Size: {lbl.size}</span>
                     </div>
+                    {/* Código de barras */}
                     <BarcodeCode39 value={lbl.barcode} />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '2px' }}>
-                      <span className="label-sku">{lbl.sku}</span>
+                    {/* Precio */}
+                    <div style={{ width: '100%', textAlign: 'center', marginTop: '2px' }}>
                       <span className="label-price">${lbl.price}</span>
                     </div>
                   </div>
@@ -461,34 +436,20 @@ export const Labels: React.FC = () => {
               </div>
             ))
           ) : (
-            // Thermal Roll List — sin inline fontSize para que el CSS de impresión mande
+            // Thermal Roll — solo talla, barcode y precio
             <div className="print-thermal">
               {flatLabels.map((lbl, idx) => (
                 <div key={idx} className="antara-label thermal lbl-print">
-                  {/* Header: ANTARA | sólo la inicial del dueño */}
-                  <div className="lbl-header">
-                    <span className="label-title">ANTARA</span>
-                    <span className="label-owner">
-                      {(lbl.ownerName || 'A').charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  {/* Nombre del producto */}
-                  <div className="label-product-name">{lbl.productName}</div>
-                  {/* Solo talla — sin color */}
+                  {/* Solo talla */}
                   <div className="label-details">
-                    <span>T: {lbl.size}</span>
+                    <span>Size: {lbl.size}</span>
                   </div>
                   {/* Código de barras */}
                   <BarcodeCode39 value={lbl.barcode} />
-                  {/* SKU | Precio */}
-                  <table className="lbl-footer-table">
-                    <tbody>
-                      <tr>
-                        <td className="label-sku">{lbl.sku}</td>
-                        <td className="label-price">${lbl.price}</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  {/* Precio centrado */}
+                  <div className="lbl-price-row">
+                    <span className="label-price">${lbl.price}</span>
+                  </div>
                 </div>
               ))}
             </div>

@@ -697,7 +697,7 @@ tr:hover td {
 
 .label-barcode-svg {
   width: 100%;
-  max-height: 22px;
+  max-height: 32px;
 }
 
 .label-sku {
@@ -907,27 +907,6 @@ tr:hover td {
     padding: 0;
   }
 
-  .print-thermal .antara-label {
-    width: 40mm;
-    height: 30mm;
-    border: none;
-    page-break-after: always;
-    page-break-inside: avoid;
-    break-after: page;
-    break-inside: avoid;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 1mm;
-    box-sizing: border-box;
-  }
-
-  .print-thermal .antara-label:last-child {
-    page-break-after: auto;
-    break-after: auto;
-  }
 
   /* ─── Sheet Labels — Hoja carta autoadhesiva (4×9 grid) ─── */
   html.print-label-sheet {
@@ -988,12 +967,12 @@ tr:hover td {
     height: 30mm !important;
     box-sizing: border-box !important;
     border: none !important;
-    padding: 4mm 1mm 1mm 7.5mm !important;   /* PUSH FUERTE: 4mm top, 7.5mm left, 1mm right/bottom */
+    padding: 2mm !important;   /* Padding simétrico — el exceso izquierdo causaba corte */
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    justify-content: flex-start !important;
-    gap: 2pt !important;             /* Mayor separación entre elementos */
+    justify-content: space-between !important;
+    gap: 0 !important;
     overflow: hidden !important;
     page-break-after: always !important;
     break-after: page !important;
@@ -1009,107 +988,76 @@ tr:hover td {
     break-after: auto !important;
   }
 
-  /* ── Header: ANTARA  |  [DUEÑO] ── */
-  .print-thermal .lbl-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    width: 100% !important;
-    border-bottom: 0.5pt solid #000 !important;
-    padding-bottom: 0.5mm !important;
-    margin-bottom: 0 !important;
-    line-height: 1 !important;
+  /* ── shape-rendering: crispEdges para barras SVG — elimina el efecto ghosting ── */
+  .print-thermal svg.label-barcode-svg,
+  .print-thermal svg.label-barcode-svg rect,
+  .print-sheet svg.label-barcode-svg,
+  .print-sheet svg.label-barcode-svg rect {
+    shape-rendering: crispEdges !important;
   }
 
-  .print-thermal .label-title {
-    font-size: 7pt !important;
-    font-weight: bold !important;
-    letter-spacing: 0.3px !important;
-    line-height: 1 !important;
-  }
-
-  .print-thermal .label-owner {
-    font-size: 9pt !important;        /* Más grande para la inicial */
-    font-weight: bold !important;
-    border: 0.75pt solid #000 !important;
-    padding: 0 3px !important;
-    border-radius: 1px !important;
-    line-height: 1.2 !important;
-    white-space: nowrap !important;
-  }
-
-  /* ── Nombre del producto ── */
-  .print-thermal .label-product-name {
-    font-size: 8pt !important;
-    font-weight: 800 !important;
-    text-align: center !important;
-    line-height: 1.15 !important;
-    overflow: hidden !important;
-    white-space: nowrap !important;
-    text-overflow: ellipsis !important;
-    width: 100% !important;
-    margin: 0 !important;
-  }
-
-  /* ── Talla y Color ── */
+  /* ── Talla ── */
   .print-thermal .label-details {
     display: flex !important;
-    gap: 4px !important;
     justify-content: center !important;
-    font-size: 7.5pt !important;
-    font-weight: 700 !important;
-    line-height: 1.15 !important;
-    margin: 0 !important;
+    font-size: 8pt !important;
+    font-weight: 400 !important;   /* Normal — sin negrita excesiva */
+    line-height: 1.3 !important;
+    margin: 0 0 1pt 0 !important;
   }
 
-  /* ── Código de barras — delgado para liberar espacio ── */
+  /* ── Código de barras — aprovecha todo el espacio liberado ── */
   .print-thermal svg.label-barcode-svg {
     width: 100% !important;
-    height: 24pt !important;      /* Aprovechando espacio vertical */
+    height: 38pt !important;      /* Mayor altura = barras más altas = más fácil de leer */
     display: block !important;
     overflow: hidden !important;
+    flex: 1 !important;           /* Ocupa todo el espacio vertical disponible */
   }
 
-  /* ── Footer: SKU | Precio — tabla para garantizar que el precio no se corte ── */
-  .print-thermal .lbl-footer-table {
+  /* ── Precio centrado ── */
+  .print-thermal .lbl-price-row {
     width: 100% !important;
-    border-collapse: collapse !important;
-    table-layout: fixed !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .print-thermal .lbl-footer-table td {
-    padding: 0 !important;
-    border: none !important;
-    background: none !important;
-    color: #000 !important;
+    text-align: center !important;
+    margin: 1pt 0 0 0 !important;
     line-height: 1 !important;
-    vertical-align: middle !important;
   }
 
-  /* SKU: columna izquierda, ocupa 60%, se trunca si es largo */
-  .print-thermal .label-sku {
-    font-family: 'Courier New', monospace !important;
-    font-size: 5pt !important;
-    font-weight: 700 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    display: table-cell !important;
-    width: 60% !important;
-    text-align: left !important;
-  }
-
-  /* Precio: columna derecha, 40%, siempre visible, nunca se recorta */
   .print-thermal .label-price {
-    font-size: 11pt !important;
-    font-weight: 900 !important;
-    text-align: right !important;
-    display: table-cell !important;
-    width: 40% !important;
+    font-size: 12pt !important;
+    font-weight: 600 !important;   /* Semi-bold — destacado pero sin saturar */
     white-space: nowrap !important;
   }
 
-  /* ══ Hoja carta autoadhesiva (4×9 grid) — sin cambios ══ */
+  /* ══ Hoja carta autoadhesiva (4×9 grid) ── */
+  /* Talla */
+  .print-sheet .label-details {
+    font-size: 8pt !important;
+    font-weight: 400 !important;   /* Normal */
+    text-align: center !important;
+    margin: 0 0 1pt 0 !important;
+  }
+
+  /* Barcode hoja */
+  .print-sheet svg.label-barcode-svg {
+    width: 100% !important;
+    height: 30pt !important;
+    display: block !important;
+    flex: 1 !important;
+  }
+
+  /* Precio hoja */
+  .print-sheet .label-price {
+    font-size: 11pt !important;
+    font-weight: 600 !important;   /* Semi-bold */
+    text-align: center !important;
+    display: block !important;
+    width: 100% !important;
+  }
+}
+
+/* ─── Utilidad: animación de giro (usada en íconos de carga) ─── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }

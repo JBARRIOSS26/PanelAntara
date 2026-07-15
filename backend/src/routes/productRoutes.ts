@@ -42,15 +42,24 @@ router.get('/barcode/:barcode', authMiddleware, async (req, res) => {
   const barcode = req.params.barcode;
   try {
     const db = await getDB();
+    
+    // Check for ID lookup (e.g., 00000081 -> 81)
+    let variantId = null;
+    if (/^\d{8}$/.test(barcode)) {
+      variantId = parseInt(barcode, 10);
+    }
+
     const query = `
       SELECT pv.*, p.name as product_name, pr.name as owner_name
       FROM product_variants pv
       JOIN products p ON pv.product_id = p.id
       LEFT JOIN proprietarias pr ON p.owner_id = pr.id
-      WHERE pv.barcode = ? OR pv.sku = ?
+      WHERE pv.barcode = ? OR pv.sku = ? ${variantId ? 'OR pv.id = ?' : ''}
       LIMIT 1
     `;
-    const variant = await db.get(query, [barcode, barcode]);
+    const params = variantId ? [barcode, barcode, variantId] : [barcode, barcode];
+    const variant = await db.get(query, params);
+    
     if (!variant) {
       return res.status(404).json({ error: 'Código de barras o SKU no encontrado.' });
     }
