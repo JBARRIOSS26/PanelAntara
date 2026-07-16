@@ -59,6 +59,8 @@ const BarcodeCode39: React.FC<{ value: string }> = ({ value }) => {
         ref={svgRef} 
         style={{
           display: 'block',
+          width: '100%',
+          maxWidth: '100%',
           height: 'auto',
           shapeRendering: 'crispEdges'
         }} 
@@ -439,7 +441,7 @@ export const Labels: React.FC = () => {
             <div className="print-thermal">
               {flatLabels.map((lbl, idx) => (
                 <div key={idx} className="antara-label thermal lbl-print">
-                  <div style={{ transform: 'translateX(6mm)', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <div className="label-title">ANTARA</div>
                     <div className="label-details" style={{ margin: '1px 0' }}>
                       <span>Size: {lbl.size}</span>

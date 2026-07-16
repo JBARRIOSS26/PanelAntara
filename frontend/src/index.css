@@ -963,8 +963,6 @@ tr:hover td {
     height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    position: relative !important;
-    left: -6mm !important; /* EMPUJE FÍSICO DEFINITIVO A LA IZQUIERDA */
   }
 
   /* Cada etiqueta ocupa exactamente la página provista por el driver */
