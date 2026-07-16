@@ -19,31 +19,30 @@ interface BatchLabelItem {
 
 const BarcodeCode39: React.FC<{ value: string }> = ({ value }) => {
   const cleanValue = (value || '').toUpperCase();
-  const [imgSrc, setImgSrc] = useState<string>('');
+  const svgRef = React.useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    if (!cleanValue) return;
+    if (!cleanValue || !svgRef.current) return;
     try {
-      const canvas = document.createElement('canvas');
-      // ¡CRÍTICO! Generar en escala 1:1 exacta para evitar interpolación del navegador.
-      // Si la imagen se escala con CSS, el navegador crea píxeles grises que el
-      // driver de la impresora convierte en sombras punteadas (efecto encimado).
-      JsBarcode(canvas, cleanValue, {
-        format: 'CODE39',
-        width: 1,  
+      // El width: 1.5 hacía que el SVG midiera más de 40mm, desbordando
+      // hacia la izquierda y rompiendo el centrado. Con width: 1 cabe perfectamente.
+      JsBarcode(svgRef.current, cleanValue, {
+        format: 'EAN13',
+        width: 1, // Tamaño perfecto para que quepa en 40mm sin desbordar
         height: 25,
-        displayValue: false,
-        margin: 2,
+        displayValue: true, 
+        fontSize: 10,
+        marginLeft: 10,
+        marginRight: 10,
+        marginTop: 0,
+        marginBottom: 0,
         background: '#ffffff',
         lineColor: '#000000'
       });
-      setImgSrc(canvas.toDataURL('image/png'));
     } catch (err) {
       console.error('Error generando código de barras:', err);
     }
   }, [cleanValue]);
-
-  if (!imgSrc) return <div style={{ height: '32px' }} />;
 
   return (
     <div
@@ -56,13 +55,12 @@ const BarcodeCode39: React.FC<{ value: string }> = ({ value }) => {
         backgroundColor: '#fff',
       }}
     >
-      <img 
-        src={imgSrc} 
-        alt={cleanValue}
+      <svg 
+        ref={svgRef} 
         style={{
           display: 'block',
-          maxWidth: '90%',
-          height: 'auto'
+          height: 'auto',
+          shapeRendering: 'crispEdges'
         }} 
       />
     </div>
@@ -105,16 +103,15 @@ export const Labels: React.FC = () => {
     const variant = prod?.variants.find(v => v.id === parseInt(selectedVariantId, 10));
 
     if (prod && variant) {
-      // Código corto: ID numérico cero-padded a 8 dígitos.
-      // Más corto = barras más gruesas en 40mm = escaner lee mejor.
-      // El sistema identifica la prenda por este ID en /api/products/variants/:id
-      const shortCode = String(variant.id).padStart(8, '0');
+      // Usamos 12 dígitos (EAN-13 calcula el 13vo dígito verificador)
+      // Todo escáner de ropa/retail lee EAN-13 por defecto sin configurar nada.
+      const eanCode = String(variant.id).padStart(12, '0');
       const newItem: BatchLabelItem = {
         id: Date.now() + Math.random(),
         productName: prod.name,
         variantId: variant.id,
         sku: variant.sku || `SKU-${variant.id}`,
-        barcode: shortCode,
+        barcode: eanCode,
         size: variant.size || 'Única',
         color: variant.color || 'N/A',
         price: variant.sell_price,
@@ -138,7 +135,7 @@ export const Labels: React.FC = () => {
         productName: prod.name,
         variantId: v.id,
         sku: v.sku || `SKU-${v.id}`,
-        barcode: String(v.id).padStart(8, '0'), // Código corto numérico
+        barcode: String(v.id).padStart(12, '0'), // Código EAN13 de 12 dígitos
         size: v.size || 'Única',
         color: v.color || 'N/A',
         price: v.sell_price,
@@ -442,15 +439,17 @@ export const Labels: React.FC = () => {
             <div className="print-thermal">
               {flatLabels.map((lbl, idx) => (
                 <div key={idx} className="antara-label thermal lbl-print">
-                  <div className="label-title">ANTARA</div>
-                  <div className="label-details" style={{ margin: '1px 0' }}>
-                    <span>Size: {lbl.size}</span>
-                  </div>
-                  {/* Código de barras */}
-                  <BarcodeCode39 value={lbl.barcode} />
-                  {/* Precio centrado */}
-                  <div className="lbl-price-row">
-                    <span className="label-price">${lbl.price}</span>
+                  <div style={{ transform: 'translateX(6mm)', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div className="label-title">ANTARA</div>
+                    <div className="label-details" style={{ margin: '1px 0' }}>
+                      <span>Size: {lbl.size}</span>
+                    </div>
+                    {/* Código de barras */}
+                    <BarcodeCode39 value={lbl.barcode} />
+                    {/* Precio centrado */}
+                    <div className="lbl-price-row">
+                      <span className="label-price">${lbl.price}</span>
+                    </div>
                   </div>
                 </div>
               ))}

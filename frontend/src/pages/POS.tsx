@@ -68,23 +68,35 @@ export const POS: React.FC = () => {
     loadPOSData();
   }, []);
 
-  // Barcode Scanner Listener:
-  // If the user inputs a barcode in the search field and hits enter:
   const handleSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
+    const query = searchQuery.trim();
+    if (!query) return;
 
     try {
-      // First, try to fetch by barcode or SKU directly
-      const variant = await api.products.getByBarcode(searchQuery.trim());
+      // 1. Interceptar etiquetas EAN-13/UPCA generadas por nuestro sistema
+      // Algunos escáneres omiten el primer cero y mandan 12 dígitos (UPCA).
+      // Ambos formatos empiezan con '000' y tienen el dígito verificador al final.
+      if ((query.length === 13 || query.length === 12) && query.startsWith('000')) {
+        const extractedId = parseInt(query.slice(0, -1), 10); // Quita el verificador y saca el ID
+        for (const p of products) {
+          const found = p.variants.find(v => v.id === extractedId);
+          if (found) {
+            addToCart({ ...found, product_name: p.name, owner_name: p.owner_name }, 1);
+            setSearchQuery('');
+            return;
+          }
+        }
+      }
+
+      // 2. Si no es un EAN interno, intentar buscar normalmente por código de barras / SKU en BD
+      const variant = await api.products.getByBarcode(query);
       if (variant) {
         addToCart(variant, 1);
         setSearchQuery('');
-        // Trigger soft tone or animation feedback
         return;
       }
     } catch {
-      // Barcode lookup failed, fallback to local text search filter (already happening in UI list)
       console.log("Barcode not found, using search text.");
     }
   };
@@ -199,14 +211,23 @@ export const POS: React.FC = () => {
   // Filter product variants locally
   const getFilteredVariants = () => {
     const list: any[] = [];
+    const query = searchQuery.trim();
+    let extractedId: number | null = null;
+    
+    // Si la búsqueda es un código generado internamente, extraemos el ID
+    if ((query.length === 13 || query.length === 12) && query.startsWith('000')) {
+      extractedId = parseInt(query.slice(0, -1), 10);
+    }
+
     products.forEach(p => {
       // Apply general page category filter
       if (selectedCatId && p.category_id !== parseInt(selectedCatId, 10)) return;
 
       p.variants.forEach(v => {
-        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-          (v.sku && v.sku.toLowerCase().includes(searchQuery.toLowerCase())) || 
-          (v.barcode && v.barcode.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesSearch = p.name.toLowerCase().includes(query.toLowerCase()) || 
+          (v.sku && v.sku.toLowerCase().includes(query.toLowerCase())) || 
+          (v.barcode && v.barcode.toLowerCase().includes(query.toLowerCase())) ||
+          (extractedId !== null && v.id === extractedId);
 
         if (matchesSearch) {
           list.push({
