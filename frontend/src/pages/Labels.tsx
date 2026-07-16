@@ -30,10 +30,10 @@ const BarcodeCode39: React.FC<{ value: string }> = ({ value }) => {
       // driver de la impresora convierte en sombras punteadas (efecto encimado).
       JsBarcode(canvas, cleanValue, {
         format: 'CODE39',
-        width: 1,  // 1 píxel estricto por barra estrecha
-        height: 35, // Altura exacta sin necesidad de CSS
+        width: 1,  
+        height: 25,
         displayValue: false,
-        margin: 8,  // Zona de silencio mínima requerida
+        margin: 2,
         background: '#ffffff',
         lineColor: '#000000'
       });
@@ -60,7 +60,9 @@ const BarcodeCode39: React.FC<{ value: string }> = ({ value }) => {
         src={imgSrc} 
         alt={cleanValue}
         style={{
-          display: 'block' // Evita espacio fantasma debajo de la imagen
+          display: 'block',
+          maxWidth: '90%',
+          height: 'auto'
         }} 
       />
     </div>
@@ -440,8 +442,8 @@ export const Labels: React.FC = () => {
             <div className="print-thermal">
               {flatLabels.map((lbl, idx) => (
                 <div key={idx} className="antara-label thermal lbl-print">
-                  {/* Solo talla */}
-                  <div className="label-details">
+                  <div className="label-title">ANTARA</div>
+                  <div className="label-details" style={{ margin: '1px 0' }}>
                     <span>Size: {lbl.size}</span>
                   </div>
                   {/* Código de barras */}

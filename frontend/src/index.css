@@ -955,19 +955,28 @@ tr:hover td {
 
   /* Wrapper de página — una etiqueta por página */
   .print-thermal {
-    display: block !important;
-    width: 40mm !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+    position: relative !important;
+    left: -6mm !important; /* EMPUJE FÍSICO DEFINITIVO A LA IZQUIERDA */
   }
 
-  /* Cada etiqueta ocupa exactamente una página de 40×30mm */
+  /* Cada etiqueta ocupa exactamente la página provista por el driver */
   .print-thermal .antara-label.lbl-print {
     width: 40mm !important;
     height: 30mm !important;
+    margin: 0 auto !important;
     box-sizing: border-box !important;
     border: none !important;
-    padding: 2mm !important;   /* Padding simétrico — el exceso izquierdo causaba corte */
+    /* EL SECRETO: Empujar el contenido internamente sin mover la caja */
+    /* Arriba: 2mm | Derecha: 8mm | Abajo: 2mm | Izquierda: 0mm */
+    padding: 2mm 8mm 2mm 0 !important; 
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
